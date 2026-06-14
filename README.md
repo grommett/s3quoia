@@ -47,7 +47,7 @@ Returns a `Promise` that resolves to the query results.
 | `query` | `string` | ✓ | DuckDB SQL query |
 | `from` | `number` | | Start of date range as a Unix timestamp (ms). Required when using date tokens. |
 | `to` | `number` | | End of date range as a Unix timestamp (ms). Required when using date tokens. |
-| `format` | `string` | | Output format. `'jsonRecords'` returns an array of row objects. Default is columnar (`[[col1val, ...], [col2val, ...]]`). |
+| `format` | `string` | | Output format. `'jsonRecords'` returns `[{ col: val }]`. Default is columnar `[{ name, fields: [val, ...] }]`. |
 | `plugins` | `array` | | Additional plugins to extend query processing. |
 
 ### Environment Variables
@@ -112,6 +112,28 @@ Append `?cache=false` to force a fresh download, bypassing the local cache.
 ```sql
 SELECT * FROM read_parquet('reports/summary.parquet?cache=false');
 ```
+
+## BigInt
+
+> [!WARNING]
+> DuckDB returns `BigInt` for `COUNT(*)`, `SUM`, and other integer aggregations. `BigInt` is not JSON-serializable — `JSON.stringify` will throw.
+
+The safest fix is to cast in SQL:
+
+```sql
+SELECT CAST(COUNT(*) AS INTEGER) AS total FROM read_parquet('data.parquet')
+```
+
+If you can't control the query, use the exported `bigintReplacer` with `JSON.stringify`:
+
+```js
+import s3Querier, { bigintReplacer } from 's3-querier';
+
+const results = await s3Querier({ ..., format: 'jsonRecords' });
+const json = JSON.stringify(results, bigintReplacer);
+```
+
+Note: `bigintReplacer` converts `BigInt` to `Number`, which loses precision for values above `Number.MAX_SAFE_INTEGER` (~9 quadrillion). For large integer IDs or counters, prefer the SQL cast.
 
 ## Caching
 
