@@ -8,7 +8,8 @@
     ".": "./src/s3-querier.js"
   },
   "files": [
-    "src/",
+    "src/**/*.js",
+    "!src/**/*.test.js",
     "docs/",
     "README.md"
   ],
