@@ -6,8 +6,8 @@ const db = await DuckDBInstance.create(':memory:', {
 });
 
 const formatStrategies = {
-  jsonRecords: (reader) => reader.getRowObjectsJS(),
-  default: (reader) => reader.getColumnsJS(),
+  jsonRecords: formatJsonRecords,
+  default: formatColumnar,
 };
 
 /**
@@ -15,8 +15,8 @@ const formatStrategies = {
  *
  * @param {string} sql - The SQL query to execute
  * @param {object} options - Query options
- * @param {string} options.format - Output format: 'row' for row-based, otherwise columnar (default)
- * @returns {Promise<Array>} Query results in the specified format
+ * @param {string} options.format - Output format: 'jsonRecords' for row objects, otherwise columnar (default)
+ * @returns {Promise<Array>} Query results in the requested format
  */
 export async function query(sql, options = {}) {
   const { format } = options;
@@ -25,9 +25,10 @@ export async function query(sql, options = {}) {
   try {
     const connection = await db.connect();
     const reader = await connection.runAndReadAll(sql);
+    const columnsResult = reader.getColumnsObjectJS();
 
     const formatter = formatStrategies[format] ?? formatStrategies.default;
-    const result = formatter(reader);
+    const result = formatter(columnsResult);
 
     const queryTime = new Date() - queryStart;
     logger.info(`Query completed in : ${queryTime / 1000} seconds`);
@@ -36,4 +37,21 @@ export async function query(sql, options = {}) {
     logger.error(error);
     throw error;
   }
+}
+
+function formatColumnar(columnsResult) {
+  return Object.keys(columnsResult).map((key) => ({ name: key, fields: columnsResult[key] }));
+}
+
+function formatJsonRecords(columnsResult) {
+  const keys = Object.keys(columnsResult);
+  if (keys.length === 0) return [];
+  const rowCount = columnsResult[keys[0]].length;
+  return Array.from({ length: rowCount }, (_, rowIndex) => {
+    const row = {};
+    keys.forEach((key) => {
+      row[key] = columnsResult[key][rowIndex];
+    });
+    return row;
+  });
 }

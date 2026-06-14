@@ -14,11 +14,8 @@ describe('duckdb', () => {
                   return Promise.resolve({
                     runAndReadAll() {
                       return Promise.resolve({
-                        getColumnsJS() {
-                          return [
-                            [0, 0, 0],
-                            [1, 1, 1],
-                          ];
+                        getColumnsObjectJS() {
+                          return { col1: [0, 0, 0], col2: [1, 1, 1] };
                         },
                       });
                     },
@@ -31,18 +28,19 @@ describe('duckdb', () => {
         '../utils/logger.js': {
           logger: {
             info() {},
+            error() {},
           },
         },
       });
 
       const actual = await query(`select * from table;`);
       assert.deepStrictEqual(actual, [
-        [0, 0, 0],
-        [1, 1, 1],
+        { name: 'col1', fields: [0, 0, 0] },
+        { name: 'col2', fields: [1, 1, 1] },
       ]);
     });
 
-    it('returns row-based data when format is set to row', async () => {
+    it('returns row-based data when format is set to jsonRecords', async () => {
       const { query } = await esmock.strict('./index.js', {
         '@duckdb/node-api': {
           DuckDBInstance: {
@@ -52,12 +50,8 @@ describe('duckdb', () => {
                   return Promise.resolve({
                     runAndReadAll() {
                       return Promise.resolve({
-                        getRowObjectsJS() {
-                          return [
-                            { id: 1, name: 'Alice', age: 25 },
-                            { id: 2, name: 'Bob', age: 30 },
-                            { id: 3, name: 'Charlie', age: 35 },
-                          ];
+                        getColumnsObjectJS() {
+                          return { id: [1, 2, 3], name: ['Alice', 'Bob', 'Charlie'], age: [25, 30, 35] };
                         },
                       });
                     },
@@ -70,6 +64,7 @@ describe('duckdb', () => {
         '../utils/logger.js': {
           logger: {
             info() {},
+            error() {},
           },
         },
       });
@@ -83,7 +78,7 @@ describe('duckdb', () => {
       assert.deepStrictEqual(actual, expected);
     });
 
-    it('returns empty array for row format when no data', async () => {
+    it('returns empty array for jsonRecords format when no data', async () => {
       const { query } = await esmock.strict('./index.js', {
         '@duckdb/node-api': {
           DuckDBInstance: {
@@ -93,8 +88,8 @@ describe('duckdb', () => {
                   return Promise.resolve({
                     runAndReadAll() {
                       return Promise.resolve({
-                        getRowObjectsJS() {
-                          return [];
+                        getColumnsObjectJS() {
+                          return {};
                         },
                       });
                     },
@@ -107,6 +102,7 @@ describe('duckdb', () => {
         '../utils/logger.js': {
           logger: {
             info() {},
+            error() {},
           },
         },
       });
@@ -125,8 +121,8 @@ describe('duckdb', () => {
                   return Promise.resolve({
                     runAndReadAll() {
                       return Promise.resolve({
-                        getColumnsJS() {
-                          return [];
+                        getColumnsObjectJS() {
+                          return {};
                         },
                       });
                     },
@@ -139,6 +135,7 @@ describe('duckdb', () => {
         '../utils/logger.js': {
           logger: {
             info() {},
+            error() {},
           },
         },
       });
