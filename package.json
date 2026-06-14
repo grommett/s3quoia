@@ -1,0 +1,50 @@
+{
+  "name": "s3-querier",
+  "version": "1.0.0",
+  "description": "Query S3-compatible storage with DuckDB and SQL",
+  "type": "module",
+  "main": "src/s3-querier.js",
+  "exports": {
+    ".": "./src/s3-querier.js"
+  },
+  "files": [
+    "src/",
+    "docs/",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/grommett/s3-querier.git"
+  },
+  "author": "david@pinkiering.com",
+  "scripts": {
+    "test": "node --test \"./src/**/*.test.js\"",
+    "test:e2e": "docker compose -f e2e/docker-compose.yml up -d --wait && node e2e/setup/seed.js && node --test e2e/*.e2e.js; docker compose -f e2e/docker-compose.yml down",
+    "test:coverage:html": "node_modules/.bin/c8 -x coverage -x **/*.test.js --all -r html node --test \"./src/**/*.test.js\"",
+    "prettify": "prettier \"./src/**/*.js\" --write",
+    "lint": "eslint \"./src/**/*.js\"",
+    "lint:fix": "eslint --fix \"./src/**/*.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": ["s3", "duckdb", "parquet", "query"],
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@derekstride/tree-sitter-sql": "^0.3.11",
+    "@duckdb/node-api": "^1.4.0-r.1",
+    "avsc": "^5.7.7",
+    "date-fns": "^4.0.0",
+    "lru-cache": "^11.0.0",
+    "peggy": "^4.2.0",
+    "pino": "^9.12.0",
+    "tree-sitter": "^0.21.1"
+  },
+  "devDependencies": {
+    "c8": "^11.0.0",
+    "eslint": "^8.50.0",
+    "esmock": "^2.7.5",
+    "prettier": "^3.0.3"
+  }
+}
