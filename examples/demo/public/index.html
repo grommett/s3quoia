@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>s3-querier demo</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/editor/editor.main.min.css"
+    />
+  </head>
+  <body>
+    <header class="demo-header">
+      <h1 class="demo-title">s3-querier demo</h1>
+      <p class="demo-subtitle">Query parquet files on S3-compatible storage with DuckDB SQL</p>
+    </header>
+
+    <main class="demo-main">
+      <section class="demo-config">
+        <h2 class="demo-section-title">Connection</h2>
+        <div class="demo-fields">
+          <label class="demo-label">
+            Endpoint
+            <input class="demo-input" id="endpoint" type="text" value="http://localhost:9000" />
+          </label>
+          <label class="demo-label">
+            Bucket
+            <input class="demo-input" id="bucket" type="text" value="demo" />
+          </label>
+          <label class="demo-label">
+            Access Key ID
+            <input class="demo-input" id="accessKeyId" type="text" value="minioadmin" />
+          </label>
+          <label class="demo-label">
+            Secret Access Key
+            <input class="demo-input" id="secretAccessKey" type="password" value="minioadmin" />
+          </label>
+          <label class="demo-label">
+            IBM API Key
+            <input class="demo-input" id="apiKey" type="password" placeholder="IAM API key (overrides HMAC creds)" />
+          </label>
+        </div>
+      </section>
+
+      <section class="demo-editor-section">
+        <div class="demo-editor-header">
+          <h2 class="demo-section-title">SQL</h2>
+          <div class="demo-examples">
+            <span class="demo-examples-label">Examples:</span>
+            <button class="demo-example-btn" data-query="all-sales">All sales</button>
+            <button class="demo-example-btn" data-query="by-product">By product</button>
+            <button class="demo-example-btn" data-query="by-region">By region</button>
+            <button class="demo-example-btn" data-query="products">Products</button>
+            <button class="demo-example-btn" data-query="join">Sales + products</button>
+          </div>
+        </div>
+        <div id="editor" class="demo-editor"></div>
+        <div class="demo-run-row">
+          <button class="demo-run-btn" id="runBtn">Run query</button>
+          <label class="demo-format-label">
+            Format
+            <select class="demo-format-select" id="format">
+              <option value="jsonRecords">jsonRecords</option>
+              <option value="columnar">columnar (default)</option>
+            </select>
+          </label>
+          <span class="demo-status" id="status"></span>
+        </div>
+      </section>
+
+      <section class="demo-results-section">
+        <h2 class="demo-section-title">Results</h2>
+        <div id="results" class="demo-results"></div>
+      </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs/loader.min.js"></script>
+    <script>
+      require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        const script = document.createElement('script');
+        script.src = 'app.js';
+        document.body.appendChild(script);
+      });
+    </script>
+  </body>
+</html>

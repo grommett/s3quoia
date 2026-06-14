@@ -4,8 +4,8 @@ Query S3-compatible storage directly with DuckDB SQL. S3 Querier handles listing
 
 ## Requirements
 
-- Node.js >= 20
-- S3-compatible storage (AWS S3, MinIO, IBM COS, etc.) with HMAC credentials
+- Node.js >= 22
+- S3-compatible storage (AWS S3, MinIO, IBM COS, etc.) with HMAC or IBM IAM credentials
 
 ## Installation
 
@@ -135,6 +135,45 @@ const results = await s3Querier({
   plugins: [new AvroPlugin()],
   query: `SELECT * FROM read_json('data.avro+json')`,
 });
+```
+
+## Examples
+
+The `examples/` directory contains a local interactive demo and standalone scripts. All examples target a local MinIO instance — you'll need [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Both are bundled with Docker Desktop on Mac and Windows; on Linux, install the Compose plugin separately.
+
+### Interactive demo
+
+Starts MinIO, seeds it with sample parquet data, and launches an Express server with a Monaco SQL editor in the browser.
+
+```bash
+npm run demo:up     # start MinIO and seed data (runs once)
+npm run demo:start  # start the Express server
+```
+
+Then open [http://localhost:3000](http://localhost:3000). The editor has five pre-loaded example queries you can run or modify. When you're done:
+
+```bash
+npm run demo:down   # stop MinIO
+```
+
+### Standalone scripts
+
+Run any script directly after MinIO is up:
+
+```bash
+npm run demo:up                               # if not already running
+node examples/scripts/basic-query.js         # fetch the first 10 sales rows
+node examples/scripts/glob-pattern.js        # filter to Jan–Feb with a brace glob
+node examples/scripts/date-range.js          # use {from}/{to} date tokens
+node examples/scripts/ibm-cos.js             # IBM Cloud Object Storage (requires env vars)
+```
+
+For the IBM COS script, set these environment variables first:
+
+```bash
+export IBM_COS_API_KEY=your-api-key
+export IBM_COS_ENDPOINT=https://s3.us-south.cloud-object-storage.appdomain.cloud
+export IBM_COS_BUCKET=your-bucket
 ```
 
 ## License

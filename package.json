@@ -24,7 +24,10 @@
     "prettify": "prettier \"./src/**/*.js\" --write",
     "lint": "eslint \"./src/**/*.js\"",
     "lint:fix": "eslint --fix \"./src/**/*.js\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "demo:up": "docker compose -f examples/demo/docker-compose.yml up -d --wait && node examples/demo/seed.js",
+    "demo:down": "docker compose -f examples/demo/docker-compose.yml down",
+    "demo:start": "node examples/demo/server.js"
   },
   "engines": {
     "node": ">=22"
@@ -58,6 +61,7 @@
     "c8": "^11.0.0",
     "eslint": "^10.5.0",
     "esmock": "^2.7.5",
+    "express": "^5.2.1",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
