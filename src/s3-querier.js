@@ -1,6 +1,7 @@
 import { LRUCache } from 'lru-cache';
 
 import S3 from './s3/s3.js';
+export { bigintReplacer } from './utils/bigint-replacer.js';
 import { mergeSettings } from './utils/file-settings/file-settings.js';
 import { query as execQuery } from './duck-db/index.js';
 import QueryParserPlugin from './plugins/query-parser/query-parser.js';
@@ -21,7 +22,7 @@ const listingCache = new LRUCache({ max: 1000 });
  * @param {string} options.query - DuckDB SQL query. Supports date tokens, location tokens, and glob patterns.
  * @param {number} [options.from] - Start of date range as a Unix timestamp in milliseconds. Required when using date tokens.
  * @param {number} [options.to] - End of date range as a Unix timestamp in milliseconds. Required when using date tokens.
- * @param {string} [options.format] - Output format. `'jsonRecords'` returns `[{ col: val }]`. Default is columnar `[[val, ...], [val, ...]]`.
+ * @param {string} [options.format] - Output format. `'jsonRecords'` returns `[{ col: val }]`. Default is columnar `[{ name, fields: [val, ...] }]`.
  * @param {object[]} [options.plugins] - Additional plugins for query parsing or file processing.
  * @returns {Promise<Array>} Query results in the requested format.
  */
