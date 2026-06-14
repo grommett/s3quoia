@@ -169,7 +169,7 @@ describe('duckdb', () => {
       });
       try {
         await query(`select * from table;`);
-      } catch (e) {
+      } catch {
         assert.deepStrictEqual(loggerErrorSpy.mock.callCount(), 1);
       }
     });
