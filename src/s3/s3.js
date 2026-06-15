@@ -386,7 +386,7 @@ export default class S3 {
    */
   async objectToFile(key) {
     const file = `${this.mount}/${key}`;
-    const tmp = `${file}.${process.pid}.${Date.now()}.tmp`;
+    const tmp = `${file}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
     try {
       const response = await this.s3.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
       const chunks = [];

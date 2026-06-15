@@ -1,4 +1,4 @@
-import { regexFromPattern, removeFileDatePatterns } from '../../utils/date-regex/date-regex.js';
+import { regexFromPattern } from '../../utils/date-regex/date-regex.js';
 import {
   removeFileSettingTokens,
   removeDoubleFwdSlash,
@@ -42,11 +42,11 @@ function applyFileSetting(query, { sqlFileReference, file, bucket }, downloadedP
   const filePattern = regexFromPattern(file);
   const matchingPaths = downloadedPaths.filter((localPath) => matchesPattern(localPath, localDir, filePattern));
   const searchStr = sqlFileReference.replace(/\?cache=(true|false)/i, '');
-  const replacement = matchingPaths[0] ?? `${localDir}${removeFileDatePatterns(file)}`;
 
+  if (matchingPaths.length === 0) throw new Error(`No files found for: ${file}`);
   if (matchingPaths.length > 1) return replaceWithArray(query, searchStr, matchingPaths);
 
-  return query.replace(new RegExp(escapeForRegex(searchStr), 'gi'), replacement);
+  return query.replace(new RegExp(escapeForRegex(searchStr), 'gi'), matchingPaths[0]);
 }
 
 function matchesPattern(localPath, localDir, filePattern) {

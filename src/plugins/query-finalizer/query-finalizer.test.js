@@ -45,7 +45,7 @@ describe('QueryFinalizerPlugin', () => {
       assert.ok(!result.includes('{MM}'));
     });
 
-    it('falls back to a local glob when no files are downloaded so DuckDB emits "no files found"', () => {
+    it('throws when no downloaded files match the file pattern', () => {
       const query = `SELECT * FROM read_parquet('events/year={yyyy}/month={MM}/day={dd}/data.parquet')`;
       const fileSettings = [
         {
@@ -55,9 +55,7 @@ describe('QueryFinalizerPlugin', () => {
         },
       ];
 
-      const result = plugin.finalizeQuery(query, fileSettings, [], BUCKETS_DIR);
-
-      assert.ok(result.includes('/mnt/s3/my-bucket/events/year=*/month=*/day=*/data.parquet'));
+      assert.throws(() => plugin.finalizeQuery(query, fileSettings, [], BUCKETS_DIR), /No files found/);
     });
 
     it('does not include files from a different bucket in the match', () => {
