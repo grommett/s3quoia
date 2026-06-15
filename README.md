@@ -159,6 +159,123 @@ const results = await s3Querier({
 });
 ```
 
+## MCP Server
+
+s3-querier ships a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes two tools to any MCP-compatible client (Claude Desktop, Claude Code, etc.):
+
+- **`query`** — runs a DuckDB SQL query against your S3 data
+- **`list_files`** — lists objects under a prefix so an LLM can discover available data
+
+### Environment variables
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `S3_ENDPOINT` | ✓ | S3 endpoint URL |
+| `S3_BUCKET` | ✓ | Default bucket |
+| `S3_ACCESS_KEY_ID` | ✓ * | HMAC access key |
+| `S3_SECRET_ACCESS_KEY` | ✓ * | HMAC secret key |
+| `S3_API_KEY` | ✓ * | IBM IAM API key (alternative to HMAC) |
+| `S3_BUCKETS_DIR` | | Local cache directory (default `/tmp/s3-querier`) |
+
+\* Either HMAC pair **or** `S3_API_KEY` is required.
+
+### Basic server
+
+The built-in server entry point requires no configuration beyond environment variables:
+
+```bash
+claude mcp add s3-querier \
+  -e S3_ENDPOINT=https://s3.amazonaws.com \
+  -e S3_BUCKET=my-bucket \
+  -e S3_ACCESS_KEY_ID=key \
+  -e S3_SECRET_ACCESS_KEY=secret \
+  -- node node_modules/s3-querier/src/mcp/server.js
+```
+
+### Extending with `S3QuerierMCP`
+
+For richer LLM context, create a custom server using `S3QuerierMCP` and pass a `datasets` array. Each entry describes a dataset so the model knows what data is available and how it's structured — without having to explore the bucket first.
+
+```js
+// my-server.js
+import { S3QuerierMCP } from 's3-querier/src/mcp/s3querier-mcp.js';
+
+new S3QuerierMCP({
+  datasets: [
+    {
+      name: 'sales',
+      description: 'Monthly sales transactions partitioned by year and month.',
+      prefix: 'sales/',
+      partitioning: 'year/month',
+      files: {
+        data: {
+          description: 'Sales records — id (int), date, product, amount (float), region',
+        },
+      },
+    },
+    {
+      name: 'products',
+      description: 'Product catalog — static reference data, no partitioning.',
+      prefix: 'products/',
+      files: {
+        catalog: {
+          description: 'Products — name, category, price (float)',
+        },
+      },
+    },
+  ],
+}).start();
+```
+
+Register it with Claude:
+
+```bash
+claude mcp add my-datalake \
+  -e S3_ENDPOINT=https://s3.amazonaws.com \
+  -e S3_BUCKET=my-bucket \
+  -e S3_ACCESS_KEY_ID=key \
+  -e S3_SECRET_ACCESS_KEY=secret \
+  -- node my-server.js
+```
+
+#### Dataset options
+
+| Field | Description |
+| --- | --- |
+| `name` | Dataset identifier |
+| `description` | Narrative description injected into the tool prompt |
+| `prefix` | S3 path prefix (e.g. `"sales/"`) |
+| `partitioning` | Partitioning scheme hint (e.g. `"year/month"`) |
+| `bucket` | Overrides `S3_BUCKET` for this dataset |
+| `endpoint` | Overrides `S3_ENDPOINT` for this dataset |
+| `files` | Map of logical file names to `{ description }` |
+
+### Adding custom tools
+
+Pass a `tools` array to register additional MCP tools alongside the built-in ones:
+
+```js
+import { z } from 'zod';
+import { S3QuerierMCP } from 's3-querier/src/mcp/s3querier-mcp.js';
+
+new S3QuerierMCP({
+  datasets: [ /* ... */ ],
+  tools: [
+    {
+      name: 'get_report',
+      description: 'Returns the latest weekly summary report.',
+      inputSchema: {
+        week: z.string().describe('ISO week string, e.g. "2025-W03"'),
+      },
+      handler: async ({ week }) => {
+        // your logic here
+        return { content: [{ type: 'text', text: `Report for ${week}` }] };
+      },
+    },
+  ],
+}).start();
+```
+
 ## Examples
 
 The `examples/` directory contains a local interactive demo and standalone scripts. All examples target a local MinIO instance — you'll need [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Both are bundled with Docker Desktop on Mac and Windows; on Linux, install the Compose plugin separately.
