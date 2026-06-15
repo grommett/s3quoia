@@ -181,7 +181,9 @@ s3-querier ships a [Model Context Protocol](https://modelcontextprotocol.io/) se
 
 ### Basic server
 
-The built-in server entry point requires no configuration beyond environment variables:
+The built-in server entry point requires no configuration beyond environment variables.
+
+**Claude Code / Claude Desktop**
 
 ```bash
 claude mcp add s3-querier \
@@ -190,6 +192,30 @@ claude mcp add s3-querier \
   -e S3_ACCESS_KEY_ID=key \
   -e S3_SECRET_ACCESS_KEY=secret \
   -- node node_modules/s3-querier/src/mcp/server.js
+```
+
+**IBM Bob**
+
+Add to `mcp_settings.json` (global, applies across all workspaces) or `.Bob/mcp.json` (project-level, committed with your repo):
+
+```json
+{
+  "mcpServers": {
+    "s3-querier": {
+      "command": "node",
+      "args": ["/absolute/path/to/node_modules/s3-querier/src/mcp/server.js"],
+      "env": {
+        "S3_ENDPOINT": "https://s3.amazonaws.com",
+        "S3_BUCKET": "my-bucket",
+        "S3_ACCESS_KEY_ID": "key",
+        "S3_SECRET_ACCESS_KEY": "secret"
+      },
+      "disabled": false,
+      "alwaysAllow": [],
+      "disabledTools": []
+    }
+  }
+}
 ```
 
 ### Extending with `S3QuerierMCP`
@@ -227,7 +253,7 @@ new S3QuerierMCP({
 }).start();
 ```
 
-Register it with Claude:
+**Claude Code / Claude Desktop**
 
 ```bash
 claude mcp add my-datalake \
@@ -236,6 +262,28 @@ claude mcp add my-datalake \
   -e S3_ACCESS_KEY_ID=key \
   -e S3_SECRET_ACCESS_KEY=secret \
   -- node my-server.js
+```
+
+**IBM Bob**
+
+```json
+{
+  "mcpServers": {
+    "my-datalake": {
+      "command": "node",
+      "args": ["/absolute/path/to/my-server.js"],
+      "env": {
+        "S3_ENDPOINT": "https://s3.amazonaws.com",
+        "S3_BUCKET": "my-bucket",
+        "S3_ACCESS_KEY_ID": "key",
+        "S3_SECRET_ACCESS_KEY": "secret"
+      },
+      "disabled": false,
+      "alwaysAllow": [],
+      "disabledTools": []
+    }
+  }
+}
 ```
 
 #### Dataset options
