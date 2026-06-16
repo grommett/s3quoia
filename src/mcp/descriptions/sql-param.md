@@ -22,8 +22,17 @@ Location tokens — override endpoint or bucket per path:
   {endpoint:https://s3.example.com}
   {bucket:my-bucket}
 
-Glob syntax — wildcard matching for non-time path segments:
+Glob syntax — wildcard matching for non-time file name segments within a known folder:
   jobs/window=202308032130/*.parquet
+
+  Do NOT use globs on time-partitioned folder segments (year=, month=, day=, hour=, etc.).
+  A folder-level glob like hour=*/ matches every hour and causes massive over-fetching.
+  Use date tokens with from/to instead — they expand to exactly the hours/days needed:
+    ✗  data/year=2026/month=06/day=15/hour=*/file.parquet
+    ✓  data/year={yyyy}/month={MM}/day={dd}/hour={hh}/file.parquet  (with from/to)
+
+  Tokens and globs can be combined — tokens on folder segments, glob on the filename:
+    data/year={yyyy}/month={MM}/day={dd}/hour={hh}/records_*.parquet
 
 QUERYING TIME-PARTITIONED DATA OVER A RANGE
 

@@ -26,7 +26,7 @@ When querying data from a data lake, be mindful of how your queries are construc
   [Install the DuckDB CLI](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=macos&download_method=direct) and experiment with your queries on local parquet files before running them against S3. This gives a fast feedback loop for understanding data structure and refining queries.
 
 - **Be Mindful Of Time Ranges In Date Tokens**
-  Long time ranges require fetching more files and slow execution. Use narrow time ranges whenever possible.
+  Long time ranges require fetching more files and slow execution. Use narrow time ranges whenever possible. If a query fails due to the 1GB limit, narrow the `from`/`to` range and run multiple queries — for example, query 4–6 hours at a time instead of a full day.
 
 - **Create Secondary Representations Of Your Data**
   For larger datasets, break files into smaller chunks to avoid hitting the file size limit.
@@ -151,7 +151,22 @@ FROM read_parquet('jobs_failed/window=202308032130/*.parquet', union_by_name=1);
 ```
 
 > [!WARNING]
-> **Use globs with caution.** They can match more files than expected, causing unnecessary downloads and degraded performance. Always verify the file list your glob will match before running a broad query.
+> **Never use globs on time-partitioned folder segments** (e.g. `year=*/`, `month=*/`, `hour=*/`). A folder-level glob matches every partition and will over-fetch, hitting the 1GB query limit.
+>
+> Use [time formatting tokens](#time-formatting-tokens) with `from`/`to` instead — they expand to exactly the partitions needed:
+>
+> ```sql
+> -- ❌ WRONG — hour=*/ fetches every hour
+> SELECT * FROM read_parquet('data/year=2026/month=06/day=15/hour=*/file.parquet');
+>
+> -- ✅ CORRECT — {hh} with from/to fetches only the requested hours
+> SELECT * FROM read_parquet('data/year={yyyy}/month={MM}/day={dd}/hour={hh}/file.parquet', union_by_name=1);
+> ```
+>
+> Globs are appropriate only for **file name patterns within a known folder**, or for non-time path segments. They can be combined with time tokens — tokens on the folder segments, glob on the filename:
+> ```sql
+> SELECT * FROM read_parquet('data/year={yyyy}/month={MM}/day={dd}/hour={hh}/records_*.parquet', union_by_name=1);
+> ```
 
 ---
 
