@@ -106,14 +106,16 @@ function formatDataset({ name, description, bucket, endpoint, prefix, partitioni
   if (prefix) lines.push(`  Prefix: ${prefix}`);
   if (partitioning) lines.push(`  Partitioning: ${partitioning}`);
   if (files) {
-    const fileLines = Object.entries(files).map(formatFileLine);
+    const fileLines = Object.entries(files).flatMap(formatFileLine);
     lines.push('  Files:', ...fileLines);
   }
   lines.push('');
   return lines;
 }
 
-function formatFileLine([fileName, { description: fileDesc }]) {
+function formatFileLine([fileName, { description: fileDesc, schema }]) {
   const label = fileDesc ? `${fileName} — ${fileDesc}` : fileName;
-  return `    ${label}`;
+  const result = [`    ${label}`];
+  if (schema) result.push(`      Schema: ${schema}`);
+  return result;
 }

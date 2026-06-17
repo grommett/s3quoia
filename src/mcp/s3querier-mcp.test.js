@@ -35,6 +35,26 @@ describe('S3QuerierMCP', () => {
     assert.ok(listFilesTool.config.description.includes('CONFIGURED DATASETS'));
   });
 
+  it('renders file schema in dataset context when schema is provided', async () => {
+    const config = {
+      datasets: [
+        {
+          name: 'Sales',
+          files: {
+            orders: { description: 'Order records', schema: 'id (varchar), amount (float)' },
+            products: { description: 'Product catalog' },
+          },
+        },
+      ],
+    };
+    const { mcp, registrations } = await buildMcp(config);
+    await mcp.start();
+
+    const queryTool = registrations.tools.find(({ name }) => name === 'query');
+    assert.ok(queryTool.config.description.includes('Schema: id (varchar), amount (float)'));
+    assert.ok(!queryTool.config.description.includes('Schema: undefined'));
+  });
+
   it('omits dataset context from tool descriptions when no datasets are configured', async () => {
     const { mcp, registrations } = await buildMcp();
     await mcp.start();
