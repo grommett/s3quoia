@@ -21,9 +21,8 @@ Step 4: Query using the correct file paths discovered in Step 1.
 const DATASETS_INSTRUCTIONS = `
 Step 1: Read the s3-querier://datasets resource to see available datasets and their S3 paths.
 Step 2: Review the datasets to identify which are relevant to the request.
-Step 3: For time-partitioned data, call get_current_time to get the current UTC time.
-Step 4: Run SELECT * FROM read_parquet('full_path') LIMIT 1 on each relevant file to inspect column names before writing your query.
-Step 5: Query the relevant datasets directly — do not use list_files to explore the bucket.
+Step 3: Never guess column names. Run SELECT * FROM read_parquet('full_path') LIMIT 1 on each relevant file to inspect the schema — for time-partitioned paths, call get_current_time first to construct a valid path.
+Step 4: Query the relevant datasets directly — do not use list_files to explore the bucket.
 `.trim();
 
 export class S3QuerierMCP {
