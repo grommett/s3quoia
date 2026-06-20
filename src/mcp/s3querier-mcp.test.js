@@ -101,6 +101,7 @@ describe('S3QuerierMCP', () => {
     await mcp.start();
 
     assert.ok(state.serverOptions.instructions.includes('s3-querier://datasets'));
+    assert.ok(state.serverOptions.instructions.includes('LIMIT 1'));
     assert.ok(!state.serverOptions.instructions.startsWith('Step 1: Use list_files'));
   });
 
@@ -112,13 +113,26 @@ describe('S3QuerierMCP', () => {
     assert.strictEqual(state.serverOptions.instructions, 'Custom instructions only');
   });
 
-  it('appends additionalInstructions to the computed default', async () => {
+  it('appends additionalInstructions to the computed default when no datasets are configured', async () => {
     const config = { additionalInstructions: 'Project-specific guidance' };
     const { mcp, state } = await buildMcp(config);
     await mcp.start();
 
     assert.ok(state.serverOptions.instructions.includes('list_files'));
     assert.ok(state.serverOptions.instructions.includes('Project-specific guidance'));
+  });
+
+  it('appends additionalInstructions to the datasets default when datasets are configured', async () => {
+    const config = {
+      datasets: [{ name: 'Sales', description: 'Sales data', bucket: 'sales-bucket', endpoint: 'http://s3.io' }],
+      additionalInstructions:
+        'Data is updated hourly. For recent data, set from to 2 hours before current time and to to current time.',
+    };
+    const { mcp, state } = await buildMcp(config);
+    await mcp.start();
+
+    assert.ok(state.serverOptions.instructions.includes('s3-querier://datasets'));
+    assert.ok(state.serverOptions.instructions.includes('Data is updated hourly'));
   });
 
   it('registers additional tools from config', async () => {

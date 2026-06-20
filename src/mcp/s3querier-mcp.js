@@ -13,7 +13,7 @@ const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.ur
 
 const DEFAULT_INSTRUCTIONS = `
 Step 1: Use list_files to discover what data is available under a prefix.
-Step 2: Run SELECT * FROM read_parquet('path') LIMIT 1 to inspect the schema before querying.
+Step 2: Check the columns field in the list_files response — if present, use those column names. Otherwise run SELECT * FROM read_parquet('path') LIMIT 1 to inspect the schema.
 Step 3: For time-partitioned data, call get_current_time to get the current UTC time, then query with the appropriate from/to range.
 Step 4: Query using the correct file paths discovered in Step 1.
 `.trim();
@@ -21,8 +21,9 @@ Step 4: Query using the correct file paths discovered in Step 1.
 const DATASETS_INSTRUCTIONS = `
 Step 1: Read the s3-querier://datasets resource to see available datasets and their S3 paths.
 Step 2: Review the datasets to identify which are relevant to the request.
-Step 3: For time-partitioned data, call get_current_time to get the current UTC time, then query with the appropriate from/to range.
-Step 4: Query the relevant datasets directly — do not use list_files to explore the bucket.
+Step 3: For time-partitioned data, call get_current_time to get the current UTC time.
+Step 4: Run SELECT * FROM read_parquet('full_path') LIMIT 1 on each relevant file to inspect column names before writing your query.
+Step 5: Query the relevant datasets directly — do not use list_files to explore the bucket.
 `.trim();
 
 export class S3QuerierMCP {
