@@ -22,13 +22,21 @@ Location tokens — override endpoint or bucket per path:
   {endpoint:https://s3.example.com}
   {bucket:my-bucket}
 
-QUERYING TIME-PARTITIONED DATA OVER A RANGE
+QUERYING TIME-PARTITIONED DATA
 
-When data is partitioned by time and you need multiple hours, days, or months, use date
-tokens in the SQL with `from`/`to` as separate parameters. ONE query with tokens downloads
-all matching files across the range — do not make multiple tool calls with hardcoded dates.
+Always use date tokens for time-partitioned paths — even for a single snapshot. Tokens keep
+the partitioning structure explicit and make the query work correctly if the time range
+changes. Only hardcode a date when the file is genuinely static (not part of any
+time-partition scheme).
 
-  ✗ WRONG — three separate tool calls with hardcoded hours:
+Use date tokens in the SQL with `from`/`to` as separate parameters. ONE query with tokens
+downloads all matching files across the range — do not make multiple tool calls with
+hardcoded dates.
+
+  ✗ WRONG — hardcoded date in path (even for a single hour):
+      sql: SELECT * FROM read_parquet('events/year=2026/month=06/day=15/hour=14/data.parquet')
+
+  ✗ WRONG — multiple tool calls with hardcoded hours:
       sql: SELECT * FROM read_parquet('events/year=2026/month=06/day=15/hour=12/data.parquet')
       sql: SELECT * FROM read_parquet('events/year=2026/month=06/day=15/hour=13/data.parquet')
       sql: SELECT * FROM read_parquet('events/year=2026/month=06/day=15/hour=14/data.parquet')
@@ -41,9 +49,6 @@ all matching files across the range — do not make multiple tool calls with har
 Tokens also expand inside the filename, not just in path directory segments:
   data/year={yyyy}/month={MM}/day={dd}/hour={hh}/file_{yyyy}{MM}{dd}{hh}00.parquet
   → s3-querier downloads one file per hour in the from/to range.
-
-Hardcoding a date is fine for a single known file or a fixed point-in-time lookup where
-you are not spanning multiple time segments.
 
 HIVE-PARTITIONED DATA
 
