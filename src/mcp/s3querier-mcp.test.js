@@ -60,6 +60,7 @@ describe('S3QuerierMCP', () => {
       datasets: [
         {
           name: 'cloud-resources',
+          prefix: 'vpc_objects/version=v1/env=production/',
           filePathTemplate: 'year={yyyy}/month={MM}/day={dd}/hour={hh}/minute={mm}/{file}_*.parquet',
           files: { loadBalancers: { description: 'Load balancer configurations' } },
         },
@@ -82,6 +83,57 @@ describe('S3QuerierMCP', () => {
 
     const queryTool = registrations.tools.find(({ name }) => name === 'query');
     assert.ok(!queryTool.config.description.includes('CONFIGURED DATASETS'));
+  });
+
+  it('uses default (no-datasets) instructions when no datasets are configured', async () => {
+    const { mcp, state } = await buildMcp();
+    await mcp.start();
+
+    assert.ok(state.serverOptions.instructions.includes('list_files'));
+    assert.ok(!state.serverOptions.instructions.includes('s3-querier://datasets'));
+  });
+
+  it('uses datasets instructions when datasets are configured', async () => {
+    const config = {
+      datasets: [{ name: 'Sales', description: 'Sales data', bucket: 'sales-bucket', endpoint: 'http://s3.io' }],
+    };
+    const { mcp, state } = await buildMcp(config);
+    await mcp.start();
+
+    assert.ok(state.serverOptions.instructions.includes('s3-querier://datasets'));
+    assert.ok(state.serverOptions.instructions.includes('LIMIT 1'));
+    assert.ok(state.serverOptions.instructions.includes('Never guess column names'));
+    assert.ok(!state.serverOptions.instructions.startsWith('Step 1: Use list_files'));
+  });
+
+  it('overrides instructions entirely when config.instructions is provided', async () => {
+    const config = { instructions: 'Custom instructions only' };
+    const { mcp, state } = await buildMcp(config);
+    await mcp.start();
+
+    assert.strictEqual(state.serverOptions.instructions, 'Custom instructions only');
+  });
+
+  it('appends additionalInstructions to the computed default when no datasets are configured', async () => {
+    const config = { additionalInstructions: 'Project-specific guidance' };
+    const { mcp, state } = await buildMcp(config);
+    await mcp.start();
+
+    assert.ok(state.serverOptions.instructions.includes('list_files'));
+    assert.ok(state.serverOptions.instructions.includes('Project-specific guidance'));
+  });
+
+  it('appends additionalInstructions to the datasets default when datasets are configured', async () => {
+    const config = {
+      datasets: [{ name: 'Sales', description: 'Sales data', bucket: 'sales-bucket', endpoint: 'http://s3.io' }],
+      additionalInstructions:
+        'Data is updated hourly. For recent data, set from to 2 hours before current time and to to current time.',
+    };
+    const { mcp, state } = await buildMcp(config);
+    await mcp.start();
+
+    assert.ok(state.serverOptions.instructions.includes('s3-querier://datasets'));
+    assert.ok(state.serverOptions.instructions.includes('Data is updated hourly'));
   });
 
   it('registers additional tools from config', async () => {
@@ -111,8 +163,12 @@ describe('S3QuerierMCP', () => {
 
 async function buildMcp(config = {}) {
   const registrations = { tools: [], resources: [] };
+  const state = { serverOptions: null };
 
   class MockMcpServer {
+    constructor(options) {
+      state.serverOptions = options;
+    }
     registerTool(name, toolConfig, handler) {
       registrations.tools.push({ name, config: toolConfig, handler });
     }
@@ -129,5 +185,5 @@ async function buildMcp(config = {}) {
     '@modelcontextprotocol/sdk/server/stdio.js': { StdioServerTransport: class StdioServerTransport {} },
   });
 
-  return { mcp: new S3QuerierMCP(config), registrations };
+  return { mcp: new S3QuerierMCP(config), registrations, state };
 }

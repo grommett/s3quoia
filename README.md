@@ -298,6 +298,22 @@ claude mcp add my-datalake \
 | `endpoint` | Overrides `S3_ENDPOINT` for this dataset |
 | `files` | Map of logical file names to `{ description }` |
 
+#### Server instructions
+
+By default, `S3QuerierMCP` sends step-by-step workflow instructions to the LLM at connection time. When datasets are configured, the default guides the LLM to read the datasets resource, inspect schemas, and use date tokens correctly. Without datasets, it guides discovery via `list_files`.
+
+| Option | Description |
+| --- | --- |
+| `additionalInstructions` | Appended to the default instructions. Use this to add project-specific guidance, e.g. a preferred lookback window for "latest" queries. |
+| `instructions` | Replaces the default instructions entirely. |
+
+```js
+new S3QuerierMCP({
+  datasets: [ /* ... */ ],
+  additionalInstructions: 'Data is updated hourly. For recent data, set from to 2 hours before current time and to to current time.',
+}).start();
+```
+
 ### Adding custom tools
 
 Pass a `tools` array to register additional MCP tools alongside the built-in ones:

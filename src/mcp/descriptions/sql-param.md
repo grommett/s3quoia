@@ -1,5 +1,7 @@
 A DuckDB SQL query. File paths inside read_parquet() or read_csv() are resolved against S3
-and downloaded before the query runs.
+and downloaded before the query runs. Paths are relative to the bucket root — do not use
+s3://, s3a://, or any protocol prefix. To reference a non-default bucket, use the
+{bucket:name} token instead.
 
 REQUIRED: always call read_parquet() or read_csv() — plain table names are not supported.
 Prefer union_by_name=1 when reading multiple files.
