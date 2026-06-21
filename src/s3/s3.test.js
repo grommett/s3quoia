@@ -326,6 +326,36 @@ describe('S3', () => {
     });
   });
 
+  describe('evictTodayFromListingCache', () => {
+    it('removes all cache entries that start with today day-level prefix', () => {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const MM = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const listingCache = new Map([
+        [`bucket/prefix/year=${yyyy}/month=${MM}/day=${dd}/hour=14/`, [{ file: 'a.parquet', size: 1 }]],
+        [`bucket/prefix/year=${yyyy}/month=${MM}/day=${dd}/hour=15/`, [{ file: 'b.parquet', size: 1 }]],
+        [`bucket/prefix/year=${yyyy}/month=${MM}/day=${dd}/`, [{ file: 'c.parquet', size: 1 }]],
+        [`bucket/prefix/year=${yyyy}/month=${MM}/day=01/`, [{ file: 'd.parquet', size: 1 }]],
+      ]);
+      const s3 = new S3({
+        accessKeyId: '123',
+        secretAccessKey: 'secret',
+        endpoint: 'http://s3.com',
+        bucket: 'bucket',
+        listingCache,
+        plugins: [],
+      });
+
+      s3.evictTodayFromListingCache('prefix/year={yyyy}/month={MM}/day={dd}/hour={hh}/file.parquet');
+
+      assert.ok(!listingCache.has(`bucket/prefix/year=${yyyy}/month=${MM}/day=${dd}/hour=14/`));
+      assert.ok(!listingCache.has(`bucket/prefix/year=${yyyy}/month=${MM}/day=${dd}/hour=15/`));
+      assert.ok(!listingCache.has(`bucket/prefix/year=${yyyy}/month=${MM}/day=${dd}/`));
+      assert.ok(listingCache.has(`bucket/prefix/year=${yyyy}/month=${MM}/day=01/`), 'past day entries should remain');
+    });
+  });
+
   describe('preFlightCheck', () => {
     it('returns true when the total file size is within the default limit', () => {
       const s3 = new S3({

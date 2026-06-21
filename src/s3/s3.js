@@ -103,8 +103,7 @@ export default class S3 {
 
     return Promise.allSettled(listPromises).then((results) => {
       const regex = regexFromPattern(file);
-      const todayPrefix = this.getTodayPrefix(file);
-      this.listingCache.delete(`${this.bucket}/${todayPrefix}`);
+      this.evictTodayFromListingCache(file);
 
       return results
         .filter((result) => result.status === 'fulfilled')
@@ -223,6 +222,19 @@ export default class S3 {
   getTodayPrefix(filePattern) {
     const [trimmed] = filePattern.split('{dd}');
     return buildPath(`${trimmed}{dd}`, new Date());
+  }
+
+  /**
+   * Removes all listing cache entries whose key falls under today's day prefix.
+   * Covers day-level, hour-level, and minute-level cache keys in one pass.
+   *
+   * @param {string} filePattern File pattern
+   */
+  evictTodayFromListingCache(filePattern) {
+    const todayPrefix = `${this.bucket}/${this.getTodayPrefix(filePattern)}`;
+    [...this.listingCache.keys()]
+      .filter((key) => key.startsWith(todayPrefix))
+      .forEach((key) => this.listingCache.delete(key));
   }
 
   /**
