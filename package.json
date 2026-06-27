@@ -51,7 +51,6 @@
     "@duckdb/node-api": "^1.5.3-r.3",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "avsc": "^5.7.7",
-    "date-fns": "^4.0.0",
     "hyparquet": "^1.26.0",
     "lru-cache": "^11.0.0",
     "peggy": "^5.1.0",
