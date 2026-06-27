@@ -1,5 +1,8 @@
-import { eachDayOfInterval, eachHourOfInterval } from 'date-fns';
 import { yyyy, MM, dd, hh, mm, ss } from '../date-regex/date-regex.js';
+
+const MS_PER_HOUR = 60 * 60 * 1000;
+const MS_PER_DAY = 24 * MS_PER_HOUR;
+
 /**
  * Give a string with date patterns replaces patterns with actual data values
  *
@@ -15,17 +18,17 @@ export function buildPath(filePattern, date) {
 }
 
 /**
- * Given a date range returns an array of date objects
+ * Given a date range returns an array of date objects, one per UTC calendar day.
  *
  * @param {Date} from The from Date object
  * @param {Date} to The to Date object
  * @returns {Date[]} An array of dates within the to from from time range
  */
 export function datesInRange(from, to) {
-  return eachDayOfInterval({
-    start: zeroDateMins(new Date(from)),
-    end: zeroDateMins(new Date(to)),
-  });
+  const startMs = Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate());
+  const endMs = Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate());
+  const count = Math.round((endMs - startMs) / MS_PER_DAY) + 1;
+  return Array.from({ length: count }, (_, index) => new Date(startMs + index * MS_PER_DAY));
 }
 
 /**
@@ -45,29 +48,17 @@ export function monthsInRange(from, to) {
 }
 
 /**
- * Given a date range returns an array of date objects
+ * Given a date range returns an array of date objects, one per UTC hour.
  *
  * @param {Date} from The from Date object
  * @param {Date} to The to Date object
  * @returns {Date[]} An array of dates by hours within the to from from time range
  */
 export function hoursInRange(from, to) {
-  return eachHourOfInterval({
-    start: new Date(from),
-    end: new Date(to),
-  });
-}
-
-/**
- * Sets a Date object minutes and seconds to 0
- *
- * @param {Date} date Date object
- * @returns {Date} A Date object with minutes and seconds set to 0
- */
-export function zeroDateMins(date) {
-  const zeroedDate = new Date(date);
-  zeroedDate.setMinutes(0, 0);
-  return zeroedDate;
+  const startMs = Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate(), from.getUTCHours());
+  const endMs = Date.UTC(to.getUTCFullYear(), to.getUTCMonth(), to.getUTCDate(), to.getUTCHours());
+  const count = Math.round((endMs - startMs) / MS_PER_HOUR) + 1;
+  return Array.from({ length: count }, (_, index) => new Date(startMs + index * MS_PER_HOUR));
 }
 
 function noonUtcForMonthOffset(startYear, startMonth, offset) {

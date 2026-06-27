@@ -2,27 +2,27 @@ const DIGITS_4 = '\\d{4}';
 const DIGITS_2 = '\\d{2}';
 
 export function yyyy(str, date) {
-  return str.replaceAll('{yyyy}', String(date.getFullYear()));
+  return str.replaceAll('{yyyy}', String(date.getUTCFullYear()));
 }
 
 export function MM(str, date) {
-  return str.replaceAll('{MM}', String(date.getMonth() + 1).padStart(2, '0'));
+  return str.replaceAll('{MM}', String(date.getUTCMonth() + 1).padStart(2, '0'));
 }
 
 export function dd(str, date) {
-  return str.replaceAll('{dd}', String(date.getDate()).padStart(2, '0'));
+  return str.replaceAll('{dd}', String(date.getUTCDate()).padStart(2, '0'));
 }
 
 export function hh(str, date) {
-  return str.replaceAll('{hh}', String(date.getHours()).padStart(2, '0'));
+  return str.replaceAll('{hh}', String(date.getUTCHours()).padStart(2, '0'));
 }
 
 export function mm(str, date) {
-  return str.replaceAll('{mm}', String(date.getMinutes()).padStart(2, '0'));
+  return str.replaceAll('{mm}', String(date.getUTCMinutes()).padStart(2, '0'));
 }
 
 export function ss(str, date) {
-  return str.replaceAll('{ss}', String(date.getSeconds()).padStart(2, '0'));
+  return str.replaceAll('{ss}', String(date.getUTCSeconds()).padStart(2, '0'));
 }
 
 export function regexFromPattern(pattern = '') {

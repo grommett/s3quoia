@@ -50,7 +50,7 @@ describe('file path builder', () => {
         'vpc_objects_2rep/version=v1.0.0/env=production/year=2023/month=12/day=22/hour=*/minute=30/bareMetalServers_*.parquet';
       const actual = buildPath(
         'vpc_objects_2rep/version=v1.0.0/env=production/year={yyyy}/month={MM}/day={dd}/hour=*/minute=30/bareMetalServers_*.parquet',
-        new Date('2023-12-22T00:30:00'),
+        new Date('2023-12-22T00:30:00Z'),
       );
       assert.deepStrictEqual(actual, expected);
     });
