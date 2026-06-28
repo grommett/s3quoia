@@ -17,7 +17,7 @@ const MOCK_QUERY_OPTIONS = {
   defaultBucket: 'my-bucket',
 };
 
-describe('s3-querier', () => {
+describe('s3quoia', () => {
   describe('query to download settings', () => {
     it('groups files from the same bucket into a single settings entry', () => {
       const query = `
@@ -104,8 +104,8 @@ describe('s3-querier', () => {
       const preDownloadSpy = context.mock.fn(() => null);
       const plugin = { processQuery: (ctx) => ctx, preDownloadFiles: preDownloadSpy };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      await s3Querier({ ...MOCK_QUERY_OPTIONS, from: 1000, to: 2000, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      await s3quoia({ ...MOCK_QUERY_OPTIONS, from: 1000, to: 2000, plugins: [plugin] });
 
       assert.equal(preDownloadSpy.mock.callCount(), 1);
       const [callArgs] = preDownloadSpy.mock.calls[0].arguments;
@@ -118,8 +118,8 @@ describe('s3-querier', () => {
       const callbackSpy = context.mock.fn();
       const plugin = { processQuery: (ctx) => ctx, preDownloadFiles: () => callbackSpy };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.equal(callbackSpy.mock.callCount(), 1);
       const [callArgs] = callbackSpy.mock.calls[0].arguments;
@@ -136,8 +136,8 @@ describe('s3-querier', () => {
         preDownloadFiles: () => () => Promise.reject(new Error('callback error')),
       };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      const result = await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      const result = await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.deepStrictEqual(result, MOCK_RESULT);
     });
@@ -148,8 +148,8 @@ describe('s3-querier', () => {
       const preQuerySpy = context.mock.fn(() => null);
       const plugin = { processQuery: (ctx) => ctx, preQuery: preQuerySpy };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.equal(preQuerySpy.mock.callCount(), 1);
       const [callArgs] = preQuerySpy.mock.calls[0].arguments;
@@ -162,8 +162,8 @@ describe('s3-querier', () => {
       const callbackSpy = context.mock.fn();
       const plugin = { processQuery: (ctx) => ctx, preQuery: () => callbackSpy };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.equal(callbackSpy.mock.callCount(), 1);
       const [callArgs] = callbackSpy.mock.calls[0].arguments;
@@ -176,8 +176,8 @@ describe('s3-querier', () => {
         preQuery: () => () => Promise.reject(new Error('callback error')),
       };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      const result = await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      const result = await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.deepStrictEqual(result, MOCK_RESULT);
     });
@@ -188,8 +188,8 @@ describe('s3-querier', () => {
       const postQuerySpy = context.mock.fn();
       const plugin = { processQuery: (ctx) => ctx, postQuery: postQuerySpy };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.equal(postQuerySpy.mock.callCount(), 1);
       const [callArgs] = postQuerySpy.mock.calls[0].arguments;
@@ -204,8 +204,8 @@ describe('s3-querier', () => {
         postQuery: () => Promise.reject(new Error('plugin error')),
       };
 
-      const { default: s3Querier } = await getMockedQuerier();
-      const result = await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+      const { default: s3quoia } = await getMockedQuerier();
+      const result = await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
       assert.deepStrictEqual(result, MOCK_RESULT);
     });
@@ -217,8 +217,8 @@ describe('StatsPlugin', () => {
     const events = [];
     const plugin = new StatsPlugin((event) => events.push(event));
 
-    const { default: s3Querier } = await getMockedQuerier();
-    await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+    const { default: s3quoia } = await getMockedQuerier();
+    await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
     const listingEvents = events.filter((event) => event.type === 'listing');
     assert.equal(listingEvents.length, 1);
@@ -232,8 +232,8 @@ describe('StatsPlugin', () => {
     const events = [];
     const plugin = new StatsPlugin((event) => events.push(event));
 
-    const { default: s3Querier } = await getMockedQuerier();
-    await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+    const { default: s3quoia } = await getMockedQuerier();
+    await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
     const downloadEvents = events.filter((event) => event.type === 'download');
     assert.equal(downloadEvents.length, 1);
@@ -248,8 +248,8 @@ describe('StatsPlugin', () => {
     const events = [];
     const plugin = new StatsPlugin((event) => events.push(event));
 
-    const { default: s3Querier } = await getMockedQuerier();
-    await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+    const { default: s3quoia } = await getMockedQuerier();
+    await s3quoia({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
 
     const queryEvents = events.filter((event) => event.type === 'query');
     assert.equal(queryEvents.length, 1);
@@ -260,7 +260,7 @@ describe('StatsPlugin', () => {
 });
 
 function getMockedQuerier() {
-  return esmock('./s3-querier.js', {
+  return esmock('./s3quoia.js', {
     './s3/s3.js': {
       default: class {
         constructor({ plugins }) {

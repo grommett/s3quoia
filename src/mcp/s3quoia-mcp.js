@@ -6,8 +6,8 @@ import QueryTool from './tools/query/query.js';
 import ListFilesTool from './tools/list-files/list-files.js';
 import CurentTimeTool from './tools/current-time/current-time.js';
 
-import S3QuerierDocsResource from './resources/s3-querier-docs/s3-querier-docs.js';
-import S3QuerierDatasetsResource from './resources/s3-querier-datasets/s3-querier-datasets.js';
+import S3QuoiaDocsResource from './resources/s3quoia-docs/s3quoia-docs.js';
+import S3QuoiaDatasetsResource from './resources/s3quoia-datasets/s3quoia-datasets.js';
 
 const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
 
@@ -19,22 +19,22 @@ Step 4: Query using the correct file paths discovered in Step 1.
 `.trim();
 
 const DATASETS_INSTRUCTIONS = `
-Step 1: Read the s3-querier://datasets resource to see available datasets and their S3 paths.
+Step 1: Read the s3quoia://datasets resource to see available datasets and their S3 paths.
 Step 2: Review the datasets to identify which are relevant to the request.
 Step 3: Never guess column names. Run SELECT * FROM read_parquet('full_path') LIMIT 1 on each relevant file to inspect the schema — for time-partitioned paths, call get_current_time first to construct a valid path.
 Step 4: Query the relevant datasets directly — do not use list_files to explore the bucket.
 `.trim();
 
-export class S3QuerierMCP {
+export class S3QuoiaMCP {
   constructor(config = {}) {
     this.config = config;
     this.toolClasses = [QueryTool, ListFilesTool, CurentTimeTool];
-    this.resourceClasses = [S3QuerierDocsResource, S3QuerierDatasetsResource];
+    this.resourceClasses = [S3QuoiaDocsResource, S3QuoiaDatasetsResource];
   }
 
   async start() {
     const server = new McpServer(
-      { name: 's3-querier', version: pkg.version },
+      { name: 's3quoia', version: pkg.version },
       { instructions: buildInstructions(this.config) },
     );
     const transport = new StdioServerTransport();

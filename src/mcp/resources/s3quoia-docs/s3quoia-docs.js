@@ -2,15 +2,15 @@ import { readFileSync } from 'node:fs';
 
 import BaseResource from '../base-resource.js';
 
-const docsContent = readFileSync(new URL('../../../../docs/s3-querier.md', import.meta.url), 'utf8');
+const docsContent = readFileSync(new URL('../../../../docs/s3quoia.md', import.meta.url), 'utf8');
 
-export default class S3QuerierDocsResource extends BaseResource {
-  name = 's3-querier-docs';
-  uri = 's3-querier://docs';
+export default class S3QuoiaDocsResource extends BaseResource {
+  name = 's3quoia-docs';
+  uri = 's3quoia://docs';
 
   getMeta() {
     return {
-      title: 'S3 Querier Documentation',
+      title: 'S3quoia Documentation',
       description: 'Full documentation: query planning, file tokens, location tokens, and examples.',
       mimeType: 'text/markdown',
     };

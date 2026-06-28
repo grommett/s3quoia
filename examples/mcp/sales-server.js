@@ -3,7 +3,7 @@
 /**
  * Example: Sales MCP Server
  *
- * A S3QuerierMCP server enriched with dataset metadata for the demo sales
+ * A S3QuoiaMCP server enriched with dataset metadata for the demo sales
  * and product catalog data. Run the demo MinIO instance first:
  *
  *   npm run demo:up
@@ -24,9 +24,9 @@
  *   - "What is the average order value by product category?"
  */
 
-import { S3QuerierMCP } from '../../src/mcp/s3querier-mcp.js';
+import { S3QuoiaMCP } from '../../src/mcp/s3quoia-mcp.js';
 
-new S3QuerierMCP({
+new S3QuoiaMCP({
   datasets: [
     {
       name: 'sales',

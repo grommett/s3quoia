@@ -2,10 +2,10 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import s3Querier, { bigintReplacer, FSPurgePlugin, StatsPlugin } from '../../src/s3-querier.js';
+import s3quoia, { bigintReplacer, FSPurgePlugin, StatsPlugin } from '../../src/s3quoia.js';
 
 const PORT = 3000;
-const BUCKETS_DIR = join(tmpdir(), 's3-querier-demo');
+const BUCKETS_DIR = join(tmpdir(), 's3quoia-demo');
 const purgePlugin = new FSPurgePlugin({ bucketsDir: BUCKETS_DIR });
 const statsPlugin = new StatsPlugin((event) => console.log('[stats]', event));
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -19,7 +19,7 @@ app.post('/query', async (req, res) => {
   const isColumnar = format === 'columnar';
 
   try {
-    const result = await s3Querier({
+    const result = await s3quoia({
       query: sql,
       defaultEndpoint: endpoint,
       defaultBucket: bucket,

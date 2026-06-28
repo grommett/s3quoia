@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 
 import BaseTool from '../base-tool.js';
-import s3Querier, { bigintReplacer } from '../../../s3-querier.js';
+import s3quoia, { bigintReplacer } from '../../../s3quoia.js';
 
 const {
   S3_ACCESS_KEY_ID,
@@ -10,7 +10,7 @@ const {
   S3_API_KEY,
   S3_ENDPOINT,
   S3_BUCKET,
-  S3_BUCKETS_DIR = '/tmp/s3-querier',
+  S3_BUCKETS_DIR = '/tmp/s3quoia',
 } = process.env;
 
 const sqlDescription = readFileSync(new URL('../../descriptions/sql-param.md', import.meta.url), 'utf8');
@@ -21,7 +21,7 @@ export default class QueryTool extends BaseTool {
 
   getConfig() {
     const description = this.config.datasets?.length
-      ? `${toolDescription}\n\nCONFIGURED DATASETS: read the \`s3-querier://datasets\` resource for available datasets, prefixes, file path templates, and resource types.`
+      ? `${toolDescription}\n\nCONFIGURED DATASETS: read the \`s3quoia://datasets\` resource for available datasets, prefixes, file path templates, and resource types.`
       : toolDescription;
 
     return {
@@ -48,7 +48,7 @@ export default class QueryTool extends BaseTool {
     const resolvedEndpoint = endpoint || S3_ENDPOINT;
     const resolvedBucket = bucket || S3_BUCKET;
 
-    const results = await s3Querier({
+    const results = await s3quoia({
       query: sql,
       from: fromMs,
       to: toMs,

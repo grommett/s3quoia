@@ -1,15 +1,15 @@
 {
-  "name": "s3-querier",
-  "version": "1.3.1",
+  "name": "s3quoia",
+  "version": "2.0.0",
   "description": "Query S3-compatible storage with DuckDB and SQL",
   "type": "module",
-  "main": "src/s3-querier.js",
+  "main": "src/s3quoia.js",
   "bin": {
-    "s3-querier-mcp": "src/mcp/server.js"
+    "s3quoia-mcp": "src/mcp/server.js"
   },
   "exports": {
-    ".": "./src/s3-querier.js",
-    "./mcp": "./src/mcp/s3querier-mcp.js"
+    ".": "./src/s3quoia.js",
+    "./mcp": "./src/mcp/s3quoia-mcp.js"
   },
   "files": [
     "src/**/*.js",
@@ -20,13 +20,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/grommett/s3-querier.git"
+    "url": "git+ssh://git@github.com/grommett/s3quoia.git"
   },
   "author": "david@pinkiering.com",
   "scripts": {
     "test": "node --test \"./src/**/*.test.js\"",
     "test:e2e": "docker compose -f e2e/docker-compose.yml up -d --wait && node e2e/setup/seed.js && node --test e2e/*.e2e.js; docker compose -f e2e/docker-compose.yml down",
-    "test:coverage:html": "c8 -x coverage -x **/*.test.js -x src/s3-querier.js -x e2e -x examples -x '*.config.js' --all -r html node --test \"./src/**/*.test.js\"",
+    "test:coverage:html": "c8 -x coverage -x **/*.test.js -x src/s3quoia.js -x e2e -x examples -x '*.config.js' --all -r html node --test \"./src/**/*.test.js\"",
     "prettify": "prettier \"./src/**/*.js\" --write",
     "lint": "eslint \"./src/**/*.js\"",
     "lint:fix": "eslint --fix \"./src/**/*.js\"",

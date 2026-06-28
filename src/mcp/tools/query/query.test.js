@@ -5,7 +5,7 @@ import esmock from 'esmock';
 describe('handleQuery', () => {
   it('returns query results as JSON in MCP text content format', async () => {
     const { default: QueryTool } = await esmock('./query.js', {
-      '../../../s3-querier.js': {
+      '../../../s3quoia.js': {
         default: () => Promise.resolve([{ name: 'Alice', count: 5 }]),
         bigintReplacer: passThrough,
       },
@@ -23,7 +23,7 @@ describe('handleQuery', () => {
     let capturedFrom;
     let capturedTo;
     const { default: QueryTool } = await esmock('./query.js', {
-      '../../../s3-querier.js': {
+      '../../../s3quoia.js': {
         default: ({ from, to }) => {
           capturedFrom = from;
           capturedTo = to;
@@ -40,10 +40,10 @@ describe('handleQuery', () => {
     assert.strictEqual(capturedTo, new Date('2025-01-31').getTime());
   });
 
-  it('passes plugins from config to s3Querier', async () => {
+  it('passes plugins from config to s3quoia', async () => {
     let capturedPlugins;
     const { default: QueryTool } = await esmock('./query.js', {
-      '../../../s3-querier.js': {
+      '../../../s3quoia.js': {
         default: ({ plugins }) => {
           capturedPlugins = plugins;
           return Promise.resolve([]);
@@ -62,7 +62,7 @@ describe('handleQuery', () => {
   it('passes an empty plugins array when config has none', async () => {
     let capturedPlugins;
     const { default: QueryTool } = await esmock('./query.js', {
-      '../../../s3-querier.js': {
+      '../../../s3quoia.js': {
         default: ({ plugins }) => {
           capturedPlugins = plugins;
           return Promise.resolve([]);
@@ -81,7 +81,7 @@ describe('handleQuery', () => {
     let capturedFrom;
     let capturedTo;
     const { default: QueryTool } = await esmock('./query.js', {
-      '../../../s3-querier.js': {
+      '../../../s3quoia.js': {
         default: ({ from, to }) => {
           capturedFrom = from;
           capturedTo = to;

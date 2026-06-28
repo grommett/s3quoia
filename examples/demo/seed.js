@@ -61,7 +61,7 @@ console.log('Demo data seeded. MinIO console: http://localhost:9001');
 
 async function writeAndUpload(sql, key) {
   const safeName = key.replaceAll('/', '-');
-  const tmpPath = join(tmpdir(), `s3-querier-demo-${safeName}`);
+  const tmpPath = join(tmpdir(), `s3quoia-demo-${safeName}`);
   await conn.run(`COPY (${sql}) TO '${tmpPath}' (FORMAT PARQUET)`);
   const body = await readFile(tmpPath);
   await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body }));

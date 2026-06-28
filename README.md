@@ -1,4 +1,4 @@
-# s3-querier
+# S3quoia
 
 Query S3-compatible storage directly with DuckDB SQL. S3 Querier handles listing files, downloading them locally, and executing your query — turning a data lake into a queryable resource with a single function call.
 
@@ -10,15 +10,15 @@ Query S3-compatible storage directly with DuckDB SQL. S3 Querier handles listing
 ## Installation
 
 ```bash
-npm install s3-querier
+npm install s3quoia
 ```
 
 ## Usage
 
 ```js
-import s3Querier from 's3-querier';
+import s3quoia from 's3quoia';
 
-const results = await s3Querier({
+const results = await s3quoia({
   accessKeyId: 'your-access-key',
   secretAccessKey: 'your-secret-key',
   defaultEndpoint: 'https://s3.amazonaws.com',
@@ -33,7 +33,7 @@ const results = await s3Querier({
 
 ## API
 
-### `s3Querier(options)`
+### `s3quoia(options)`
 
 Returns a `Promise` that resolves to the query results.
 
@@ -127,9 +127,9 @@ SELECT CAST(COUNT(*) AS INTEGER) AS total FROM read_parquet('data.parquet')
 If you can't control the query, use the exported `bigintReplacer` with `JSON.stringify`:
 
 ```js
-import s3Querier, { bigintReplacer } from 's3-querier';
+import s3quoia, { bigintReplacer } from 's3quoia';
 
-const results = await s3Querier({ ..., format: 'jsonRecords' });
+const results = await s3quoia({ ..., format: 'jsonRecords' });
 const json = JSON.stringify(results, bigintReplacer);
 ```
 
@@ -172,7 +172,7 @@ Post-phase callbacks are fire-and-forget — errors are logged and swallowed, so
 `FSPurgePlugin` sweeps the local file cache after each query, evicting files that haven't been accessed recently. Import it alongside the default export:
 
 ```js
-import s3Querier, { FSPurgePlugin } from 's3-querier';
+import s3quoia, { FSPurgePlugin } from 's3quoia';
 
 const purgePlugin = new FSPurgePlugin({
   bucketsDir: '/tmp/s3-cache',
@@ -180,7 +180,7 @@ const purgePlugin = new FSPurgePlugin({
   refreshIntervalMin: 60,   // minimum minutes between sweeps (default: 60)
 });
 
-const results = await s3Querier({
+const results = await s3quoia({
   // ...
   plugins: [purgePlugin],
 });
@@ -191,11 +191,11 @@ const results = await s3Querier({
 `StatsPlugin` fires a single `onStats` callback for listing, download, and query events. Use it for logging, metrics, or custom dashboards:
 
 ```js
-import s3Querier, { StatsPlugin } from 's3-querier';
+import s3quoia, { StatsPlugin } from 's3quoia';
 
 const statsPlugin = new StatsPlugin((event) => console.log(event));
 
-await s3Querier({ /* ... */ plugins: [statsPlugin] });
+await s3quoia({ /* ... */ plugins: [statsPlugin] });
 // { type: 'listing',  prefix, bucket, fileCount, durationMs, cacheHit }
 // { type: 'download', bucket, from, to, cacheHits, cacheMisses, enqueuedHits, bytesDownloaded, durationMs }
 // { type: 'query',    sql, durationMs, rowCount }
@@ -216,9 +216,9 @@ Events fire independently — one listing event per S3 prefix, one download even
 The built-in Avro plugin converts Avro files to JSON before querying:
 
 ```js
-import s3Querier, { AvroPlugin } from 's3-querier';
+import s3quoia, { AvroPlugin } from 's3quoia';
 
-const results = await s3Querier({
+const results = await s3quoia({
   // ...
   plugins: [new AvroPlugin()],
   query: `SELECT * FROM read_json('data.avro+json')`,
@@ -227,7 +227,7 @@ const results = await s3Querier({
 
 ## MCP Server
 
-s3-querier ships a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes three tools to any MCP-compatible client (Claude Desktop, Claude Code, IBM Bob etc.):
+s3quoia ships a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes three tools to any MCP-compatible client (Claude Desktop, Claude Code, IBM Bob etc.):
 
 - **`query`** — runs a DuckDB SQL query against your S3 data
 - **`list_files`** — lists objects under a prefix so an LLM can discover available data
@@ -242,7 +242,7 @@ s3-querier ships a [Model Context Protocol](https://modelcontextprotocol.io/) se
 | `S3_ACCESS_KEY_ID` | ✓ * | HMAC access key |
 | `S3_SECRET_ACCESS_KEY` | ✓ * | HMAC secret key |
 | `S3_API_KEY` | ✓ * | IBM IAM API key (alternative to HMAC) |
-| `S3_BUCKETS_DIR` | | Local cache directory (default `/tmp/s3-querier`) |
+| `S3_BUCKETS_DIR` | | Local cache directory (default `/tmp/s3quoia`) |
 | `S3_PURGE_CACHE` | | Set to `false` to disable automatic file cache purging (default `true`) |
 | `S3_PURGE_TTL_MINUTES` | | Minutes since last access before a cached file is evicted (default `60`) |
 
@@ -255,12 +255,12 @@ The built-in server entry point requires no configuration beyond environment var
 **Claude Code / Claude Desktop**
 
 ```bash
-claude mcp add s3-querier \
+claude mcp add s3quoia \
   -e S3_ENDPOINT=https://s3.amazonaws.com \
   -e S3_BUCKET=my-bucket \
   -e S3_ACCESS_KEY_ID=key \
   -e S3_SECRET_ACCESS_KEY=secret \
-  -- npx -y s3-querier
+  -- npx -y s3quoia
 ```
 
 **IBM Bob**
@@ -270,9 +270,9 @@ Add to `mcp_settings.json` (global, applies across all workspaces) or `.Bob/mcp.
 ```json
 {
   "mcpServers": {
-    "s3-querier": {
+    "s3quoia": {
       "command": "npx",
-      "args": ["-y", "s3-querier"],
+      "args": ["-y", "s3quoia"],
       "env": {
         "S3_ENDPOINT": "https://s3.amazonaws.com",
         "S3_BUCKET": "my-bucket",
@@ -287,15 +287,15 @@ Add to `mcp_settings.json` (global, applies across all workspaces) or `.Bob/mcp.
 }
 ```
 
-### Extending with `S3QuerierMCP`
+### Extending with `S3QuoiaMCP`
 
-For richer LLM context, create a custom server using `S3QuerierMCP` and pass a `datasets` array. Each entry describes a dataset so the model knows what data is available and how it's structured — without having to explore the bucket first.
+For richer LLM context, create a custom server using `S3QuoiaMCP` and pass a `datasets` array. Each entry describes a dataset so the model knows what data is available and how it's structured — without having to explore the bucket first.
 
 ```js
 // my-server.js
-import { S3QuerierMCP } from 's3-querier/src/mcp/s3querier-mcp.js';
+import { S3QuoiaMCP } from 's3quoia/src/mcp/s3quoia-mcp.js';
 
-new S3QuerierMCP({
+new S3QuoiaMCP({
   datasets: [
     {
       name: 'sales',
@@ -369,7 +369,7 @@ claude mcp add my-datalake \
 
 #### Server instructions
 
-By default, `S3QuerierMCP` sends step-by-step workflow instructions to the LLM at connection time. When datasets are configured, the default guides the LLM to read the datasets resource, inspect schemas, and use date tokens correctly. Without datasets, it guides discovery via `list_files`.
+By default, `S3QuoiaMCP` sends step-by-step workflow instructions to the LLM at connection time. When datasets are configured, the default guides the LLM to read the datasets resource, inspect schemas, and use date tokens correctly. Without datasets, it guides discovery via `list_files`.
 
 | Option | Description |
 | --- | --- |
@@ -377,7 +377,7 @@ By default, `S3QuerierMCP` sends step-by-step workflow instructions to the LLM a
 | `instructions` | Replaces the default instructions entirely. |
 
 ```js
-new S3QuerierMCP({
+new S3QuoiaMCP({
   datasets: [ /* ... */ ],
   additionalInstructions: 'Data is updated hourly. For recent data, set from to 2 hours before current time and to to current time.',
 }).start();
@@ -388,19 +388,19 @@ new S3QuerierMCP({
 Pass a `plugins` array to enable `FSPurgePlugin`, `StatsPlugin`, or any custom plugin for every query the server handles:
 
 ```js
-import { S3QuerierMCP } from 's3-querier/mcp';
-import { FSPurgePlugin, StatsPlugin } from 's3-querier';
+import { S3QuoiaMCP } from 's3quoia/mcp';
+import { FSPurgePlugin, StatsPlugin } from 's3quoia';
 
-new S3QuerierMCP({
+new S3QuoiaMCP({
   datasets: [ /* ... */ ],
   plugins: [
-    new FSPurgePlugin({ bucketsDir: '/tmp/s3-querier', lastAccessTTLMinutes: 120 }),
+    new FSPurgePlugin({ bucketsDir: '/tmp/s3quoia', lastAccessTTLMinutes: 120 }),
     new StatsPlugin((event) => console.error(event)),
   ],
 }).start();
 ```
 
-The built-in server (`npx s3-querier`) runs `FSPurgePlugin` and `StatsPlugin` by default. When extending with `S3QuerierMCP`, plugins are opt-in.
+The built-in server (`npx s3quoia`) runs `FSPurgePlugin` and `StatsPlugin` by default. When extending with `S3QuoiaMCP`, plugins are opt-in.
 
 ### Adding custom tools
 
@@ -408,9 +408,9 @@ Pass a `tools` array to register additional MCP tools alongside the built-in one
 
 ```js
 import { z } from 'zod';
-import { S3QuerierMCP } from 's3-querier/src/mcp/s3querier-mcp.js';
+import { S3QuoiaMCP } from 's3quoia/src/mcp/s3quoia-mcp.js';
 
-new S3QuerierMCP({
+new S3QuoiaMCP({
   datasets: [ /* ... */ ],
   tools: [
     {

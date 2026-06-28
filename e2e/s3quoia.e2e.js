@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import s3Querier, { StatsPlugin } from '../src/s3-querier.js';
+import s3quoia, { StatsPlugin } from '../src/s3quoia.js';
 
 const ENDPOINT = 'http://localhost:9000';
 const BUCKET = 'test-bucket';
@@ -17,7 +17,7 @@ const TO = new Date('2024-12-31').getTime();
 const statsPlugin = new StatsPlugin((event) => console.log(`[stats] ${new Date().toISOString()}`, event));
 
 function query(sql) {
-  return s3Querier({
+  return s3quoia({
     accessKeyId: ACCESS_KEY,
     secretAccessKey: SECRET_KEY,
     defaultEndpoint: ENDPOINT,
@@ -33,7 +33,7 @@ function query(sql) {
 
 let bucketsDir;
 
-describe('s3-querier e2e', () => {
+describe('s3quoia e2e', () => {
   before(async () => {
     bucketsDir = await mkdtemp(join(tmpdir(), 's3-e2e-'));
   });
@@ -66,7 +66,7 @@ describe('s3-querier e2e', () => {
   });
 
   it('downloads only files within the date range using date tokens', async () => {
-    const result = await s3Querier({
+    const result = await s3quoia({
       accessKeyId: ACCESS_KEY,
       secretAccessKey: SECRET_KEY,
       defaultEndpoint: ENDPOINT,
@@ -102,7 +102,7 @@ describe('s3-querier e2e', () => {
     process.env.MAX_MB_DOWNLOAD = '0.000001';
     try {
       await assert.rejects(
-        () => s3Querier({
+        () => s3quoia({
           accessKeyId: ACCESS_KEY,
           secretAccessKey: SECRET_KEY,
           defaultEndpoint: ENDPOINT,
@@ -137,7 +137,7 @@ describe('s3-querier e2e', () => {
     const emptyDir = await mkdtemp(join(tmpdir(), 's3-e2e-empty-'));
     try {
       await assert.rejects(
-        () => s3Querier({
+        () => s3quoia({
           accessKeyId: ACCESS_KEY,
           secretAccessKey: SECRET_KEY,
           defaultEndpoint: ENDPOINT,
@@ -172,10 +172,10 @@ describe('s3-querier e2e', () => {
     };
 
     try {
-      await s3Querier({ ...baseOptions, query: `SELECT * FROM read_parquet('reports/summary.parquet') ORDER BY id` });
+      await s3quoia({ ...baseOptions, query: `SELECT * FROM read_parquet('reports/summary.parquet') ORDER BY id` });
       await writeFile(cachedFilePath, Buffer.alloc(0));
 
-      const result = await s3Querier({
+      const result = await s3quoia({
         ...baseOptions,
         query: `SELECT * FROM read_parquet('reports/summary.parquet?cache=false') ORDER BY id`,
       });
@@ -188,7 +188,7 @@ describe('s3-querier e2e', () => {
   });
 
   it('routes to the correct S3 instance using {endpoint} and {bucket} tokens in the query', async () => {
-    const result = await s3Querier({
+    const result = await s3quoia({
       accessKeyId: ACCESS_KEY,
       secretAccessKey: SECRET_KEY,
       defaultEndpoint: 'http://nonexistent.example.com',
@@ -208,7 +208,7 @@ describe('s3-querier e2e', () => {
   it('downloads only files within the hour range using {hh} date tokens', async () => {
     const hourTestDir = await mkdtemp(join(tmpdir(), 's3-e2e-hours-'));
     try {
-      const result = await s3Querier({
+      const result = await s3quoia({
         accessKeyId: ACCESS_KEY,
         secretAccessKey: SECRET_KEY,
         defaultEndpoint: ENDPOINT,
@@ -232,7 +232,7 @@ describe('s3-querier e2e', () => {
   it('downloads files spanning multiple months using date tokens', async () => {
     const multiMonthDir = await mkdtemp(join(tmpdir(), 's3-e2e-multi-month-'));
     try {
-      const result = await s3Querier({
+      const result = await s3quoia({
         accessKeyId: ACCESS_KEY,
         secretAccessKey: SECRET_KEY,
         defaultEndpoint: ENDPOINT,
@@ -257,7 +257,7 @@ describe('s3-querier e2e', () => {
   it('downloads only files within the month range using {yyyy}/{MM} tokens without a day token', async () => {
     const monthRangeDir = await mkdtemp(join(tmpdir(), 's3-e2e-month-range-'));
     try {
-      const result = await s3Querier({
+      const result = await s3quoia({
         accessKeyId: ACCESS_KEY,
         secretAccessKey: SECRET_KEY,
         defaultEndpoint: ENDPOINT,
@@ -295,8 +295,8 @@ describe('s3-querier e2e', () => {
     };
     try {
       const [q1_2024, q1_2025] = await Promise.all([
-        s3Querier({ ...baseOptions, from: new Date('2024-01-01T00:00:00Z').getTime(), to: new Date('2024-03-31T23:59:59Z').getTime() }),
-        s3Querier({ ...baseOptions, from: new Date('2025-01-01T00:00:00Z').getTime(), to: new Date('2025-01-31T23:59:59Z').getTime() }),
+        s3quoia({ ...baseOptions, from: new Date('2024-01-01T00:00:00Z').getTime(), to: new Date('2024-03-31T23:59:59Z').getTime() }),
+        s3quoia({ ...baseOptions, from: new Date('2025-01-01T00:00:00Z').getTime(), to: new Date('2025-01-31T23:59:59Z').getTime() }),
       ]);
 
       assert.strictEqual(q1_2024.length, 9);
@@ -326,7 +326,7 @@ describe('s3-querier e2e', () => {
         query: `SELECT * FROM read_parquet('reports/summary.parquet?cache=false') ORDER BY id`,
       };
 
-      const [result1, result2] = await Promise.all([s3Querier(options), s3Querier(options)]);
+      const [result1, result2] = await Promise.all([s3quoia(options), s3quoia(options)]);
 
       assert.strictEqual(result1.length, 3);
       assert.strictEqual(result2.length, 3);
@@ -343,7 +343,7 @@ describe('s3-querier e2e', () => {
     const statsDir = await mkdtemp(join(tmpdir(), 's3-e2e-stats-'));
 
     try {
-      await s3Querier({
+      await s3quoia({
         accessKeyId: ACCESS_KEY,
         secretAccessKey: SECRET_KEY,
         defaultEndpoint: ENDPOINT,
@@ -381,7 +381,7 @@ describe('s3-querier e2e', () => {
   });
 
   it('joins files from two different buckets using {bucket} tokens (ignores whitespace & comments too)', async () => {
-    const result = await s3Querier({
+    const result = await s3quoia({
       accessKeyId: ACCESS_KEY,
       secretAccessKey: SECRET_KEY,
       defaultEndpoint: ENDPOINT,

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { S3QuerierMCP } from './s3querier-mcp.js';
-import { FSPurgePlugin, StatsPlugin } from '../../s3-querier.js';
+import { S3QuoiaMCP } from './s3quoia-mcp.js';
+import { FSPurgePlugin, StatsPlugin } from '../../s3quoia.js';
 import { logger } from '../utils/logger.js';
 
-const { S3_BUCKETS_DIR = '/tmp/s3-querier', S3_PURGE_CACHE = 'true', S3_PURGE_TTL_MINUTES = '60' } = process.env;
+const { S3_BUCKETS_DIR = '/tmp/s3quoia', S3_PURGE_CACHE = 'true', S3_PURGE_TTL_MINUTES = '60' } = process.env;
 
-await new S3QuerierMCP({ plugins: buildDefaultPlugins() }).start();
+await new S3QuoiaMCP({ plugins: buildDefaultPlugins() }).start();
 
 function buildDefaultPlugins() {
   const plugins = [];

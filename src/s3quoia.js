@@ -29,7 +29,7 @@ const listingCache = new LRUCache({ max: 1000 });
  * @param {object[]} [options.plugins] - Additional plugins for query parsing or file processing.
  * @returns {Promise<Array>} Query results in the requested format.
  */
-export default function s3Querier({
+export default function s3quoia({
   to,
   from,
   bucketsDir,

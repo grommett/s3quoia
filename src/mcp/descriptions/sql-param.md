@@ -50,18 +50,18 @@ hardcoded dates.
 
 Tokens also expand inside the filename, not just in path directory segments:
   data/year={yyyy}/month={MM}/day={dd}/hour={hh}/file_{yyyy}{MM}{dd}{hh}00.parquet
-  → s3-querier downloads one file per hour in the from/to range.
+  → s3quoia downloads one file per hour in the from/to range.
 
 HIVE-PARTITIONED DATA
 
 For paths partitioned only by year and month (no day segment), use {yyyy} and {MM} together:
   sales/year={yyyy}/month={MM}/data.parquet
 
-s3-querier generates one prefix per calendar month in the from/to range, so a Q1 query
+s3quoia generates one prefix per calendar month in the from/to range, so a Q1 query
 (from=2024-01-01, to=2024-03-31) fetches exactly months 01, 02, 03 — not all of 2024.
 
 Do NOT use DuckDB character-class globs like month=0[1-3] — DuckDB does not support them.
-Use {yyyy}/{MM} tokens instead, which s3-querier expands correctly.
+Use {yyyy}/{MM} tokens instead, which s3quoia expands correctly.
 
 EXAMPLES
 

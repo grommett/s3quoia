@@ -17,5 +17,5 @@ call `get_current_time` first to get the accurate current UTC time. Do not rely 
 knowledge to guess the current date or time. This does not apply to static file queries or
 queries for a specific known date range.
 
-Read the `s3-querier://docs` resource or the `sql` parameter description for full token
+Read the `s3quoia://docs` resource or the `sql` parameter description for full token
 syntax, examples, and query planning tips before writing your first query.
