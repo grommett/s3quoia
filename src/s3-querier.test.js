@@ -98,6 +98,46 @@ describe('s3-querier', () => {
     });
   });
 
+  describe('preQuery', () => {
+    it('calls preQuery with sql, downloadedPaths, and bucketsDir', async (context) => {
+      const preQuerySpy = context.mock.fn(() => null);
+      const plugin = { processQuery: (ctx) => ctx, preQuery: preQuerySpy };
+
+      const { default: s3Querier } = await getMockedQuerier();
+      await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+
+      assert.equal(preQuerySpy.mock.callCount(), 1);
+      const [callArgs] = preQuerySpy.mock.calls[0].arguments;
+      assert.ok(typeof callArgs.sql === 'string');
+      assert.deepStrictEqual(callArgs.downloadedPaths, ['/tmp/my-bucket/data.parquet']);
+      assert.equal(callArgs.bucketsDir, '/tmp');
+    });
+
+    it('calls the callback returned by preQuery with the result', async (context) => {
+      const callbackSpy = context.mock.fn();
+      const plugin = { processQuery: (ctx) => ctx, preQuery: () => callbackSpy };
+
+      const { default: s3Querier } = await getMockedQuerier();
+      await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+
+      assert.equal(callbackSpy.mock.callCount(), 1);
+      const [callArgs] = callbackSpy.mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs.result, MOCK_RESULT);
+    });
+
+    it('does not reject the query result when the preQuery callback throws', async () => {
+      const plugin = {
+        processQuery: (ctx) => ctx,
+        preQuery: () => () => Promise.reject(new Error('callback error')),
+      };
+
+      const { default: s3Querier } = await getMockedQuerier();
+      const result = await s3Querier({ ...MOCK_QUERY_OPTIONS, plugins: [plugin] });
+
+      assert.deepStrictEqual(result, MOCK_RESULT);
+    });
+  });
+
   describe('postQuery', () => {
     it('calls postQuery with result, downloadedPaths, and bucketsDir', async (context) => {
       const postQuerySpy = context.mock.fn();

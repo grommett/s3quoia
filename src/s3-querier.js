@@ -70,8 +70,9 @@ export default function s3Querier({
     });
     const downloadedPaths = results.flatMap((result) => result.value);
     const finalQuery = runFinalizers({ plugins: systemPlugins, rawQuery, fileSettings, downloadedPaths, bucketsDir });
+    const queryCallbacks = runPreQuery(systemPlugins, { sql: finalQuery, downloadedPaths, bucketsDir });
     return execQuery(finalQuery, { format }).then((result) => {
-      runPostQuery(systemPlugins, { result, downloadedPaths, bucketsDir });
+      runPostQuery(systemPlugins, { result, downloadedPaths, bucketsDir }, queryCallbacks);
       return result;
     });
   });
@@ -142,8 +143,14 @@ function startDownloads({ to, from, downloadSettings, bucketsDir, apiKey, access
   });
 }
 
-function runPostQuery(plugins, context) {
-  plugins.forEach((plugin) => {
+function runPreQuery(plugins, context) {
+  return plugins.map((plugin) => plugin.preQuery?.(context) ?? null);
+}
+
+function runPostQuery(plugins, context, callbacks = []) {
+  plugins.forEach((plugin, index) => {
+    const cb = callbacks[index];
+    if (cb) Promise.resolve(cb(context)).catch((error) => logger.error(error));
     if (plugin.postQuery) Promise.resolve(plugin.postQuery(context)).catch((error) => logger.error(error));
   });
 }
