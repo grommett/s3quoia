@@ -4,6 +4,7 @@ import {
   removeDoubleFwdSlash,
   removeCacheSettings,
 } from '../../utils/file-settings/file-settings.js';
+import { parseFilePath } from '../../utils/path-parser/path-parser.js';
 
 export default class QueryFinalizerPlugin {
   name = 'CorePlugin';
@@ -38,15 +39,18 @@ export default class QueryFinalizerPlugin {
 /** Helpers */
 
 function applyFileSetting(query, { sqlFileReference, file, bucket }, downloadedPaths, bucketsDir) {
-  const localDir = `${bucketsDir}/${bucket}/`;
-  const filePattern = regexFromPattern(file);
-  const matchingPaths = downloadedPaths.filter((localPath) => matchesPattern(localPath, localDir, filePattern));
   const searchStr = sqlFileReference.replace(/\?cache=(true|false)/i, '');
+  if (!query.includes(searchStr)) return query;
 
-  if (matchingPaths.length === 0) throw new Error(`No files found for: ${file}`);
-  if (matchingPaths.length > 1) return replaceWithArray(query, searchStr, matchingPaths);
+  const localDir = `${bucketsDir}/${bucket}/`;
+  const matchPattern = parseFilePath(searchStr).file;
+  const filePattern = regexFromPattern(matchPattern);
+  const matchingPaths = downloadedPaths.filter((localPath) => matchesPattern(localPath, localDir, filePattern));
 
-  return query.replace(new RegExp(escapeForRegex(searchStr), 'gi'), matchingPaths[0]);
+  const uniquePaths = [...new Set(matchingPaths)];
+  if (uniquePaths.length === 0) throw new Error(`No files found for: ${file}`);
+  if (uniquePaths.length > 1) return replaceWithArray(query, searchStr, uniquePaths);
+  return query.replace(new RegExp(escapeForRegex(searchStr), 'gi'), uniquePaths[0]);
 }
 
 function matchesPattern(localPath, localDir, filePattern) {

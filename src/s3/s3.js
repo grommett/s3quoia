@@ -337,7 +337,7 @@ export default class S3 {
       .stat(`${this.mount}/${file}`)
       .then(() => {
         stats.cacheHits += 1;
-        return `${this.mount}/${file}`;
+        return this.processFile(`${this.mount}/${file}`);
       })
       .catch(() => {
         return fsPromise
@@ -392,8 +392,7 @@ export default class S3 {
       }
       await fsPromise.writeFile(tmp, Buffer.concat(chunks));
       await fsPromise.rename(tmp, file);
-      await this.processFile(file);
-      return file;
+      return this.processFile(file);
     } catch (error) {
       logger.error(`${error.$metadata?.httpStatusCode ?? error.statusCode} - ${file}`);
       await fsPromise.unlink(tmp).catch(() => {});
@@ -409,12 +408,10 @@ export default class S3 {
    * @returns {Promise} A Promise that resolves when after file is processed by one or more plugins.
    */
   processFile(file) {
-    const fileProcessPromises = this.plugins.map((plugin) => {
-      return plugin.processFile ? plugin.processFile(file) : Promise.resolve(file);
-    });
-    return Promise.allSettled(fileProcessPromises)
-      .then(() => file)
-      .catch((error) => logger.error(`Error processing file ${file} %s`, error));
+    return this.plugins.reduce((promise, plugin) => {
+      if (!plugin.processFile) return promise;
+      return promise.then((currentFile) => plugin.processFile(currentFile));
+    }, Promise.resolve(file));
   }
 
   /**
