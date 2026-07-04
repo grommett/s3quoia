@@ -361,6 +361,18 @@ claude mcp add my-datalake \
 }
 ```
 
+#### Server options
+
+| Option | Description |
+| --- | --- |
+| `name` | Server name shown in MCP client UIs (default `'s3quoia'`) |
+| `description` | Server description shown in MCP client UIs (default: `package.json` description) |
+| `datasets` | Array of dataset descriptors — see Dataset options below |
+| `plugins` | Array of plugin instances passed to every query |
+| `tools` | Array of additional MCP tool definitions |
+| `instructions` | Replaces the default LLM instructions entirely |
+| `additionalInstructions` | Appended to the default LLM instructions |
+
 #### Dataset options
 
 | Field | Description |

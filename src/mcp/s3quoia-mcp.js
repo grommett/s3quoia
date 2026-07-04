@@ -34,7 +34,11 @@ export class S3QuoiaMCP {
 
   async start() {
     const server = new McpServer(
-      { name: 's3quoia', version: pkg.version },
+      {
+        name: this.config.name ?? 's3quoia',
+        version: pkg.version,
+        description: this.config.description ?? pkg.description,
+      },
       { instructions: buildInstructions(this.config) },
     );
     const transport = new StdioServerTransport();
