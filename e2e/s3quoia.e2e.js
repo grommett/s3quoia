@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import s3quoia, { StatsPlugin } from '../src/s3quoia.js';
+import s3quoia, { StatsPlugin, AvroPlugin } from '../src/s3quoia.js';
 
 const ENDPOINT = 'http://localhost:9000';
 const BUCKET = 'test-bucket';
@@ -377,6 +377,32 @@ describe('s3quoia e2e', () => {
       assert.strictEqual(queryEvents[0].rowCount, 6);
     } finally {
       await rm(statsDir, { recursive: true });
+    }
+  });
+
+  it('downloads and queries an avro file using AvroPlugin', async () => {
+    const avroDir = await mkdtemp(join(tmpdir(), 's3-e2e-avro-'));
+    try {
+      const result = await s3quoia({
+        accessKeyId: ACCESS_KEY,
+        secretAccessKey: SECRET_KEY,
+        defaultEndpoint: ENDPOINT,
+        defaultBucket: BUCKET,
+        bucketsDir: avroDir,
+        plugins: [new AvroPlugin()],
+        from: FROM,
+        to: TO,
+        query: `SELECT * FROM read_json('reports/events.avro') ORDER BY id`,
+        format: 'jsonRecords',
+      });
+
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(Number(result[0].id), 1);
+      assert.strictEqual(result[0].event_type, 'login');
+      assert.strictEqual(result[0].region, 'us-east');
+      assert.strictEqual(result[2].event_type, 'purchase');
+    } finally {
+      await rm(avroDir, { recursive: true });
     }
   });
 

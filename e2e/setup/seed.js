@@ -1,8 +1,10 @@
 import { S3Client, CreateBucketCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { DuckDBInstance } from '@duckdb/node-api';
 import { readFile, rm, mkdtemp } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import avro from 'avsc';
 
 const ENDPOINT = 'http://localhost:9000';
 const BUCKET = 'test-bucket';
@@ -60,6 +62,7 @@ async function generateFixtures() {
     UNION ALL SELECT 3, 'purchase completed'
   `;
 
+  const avroPath = join(dir, 'events.avro');
   const parquetPath = join(dir, 'data.parquet');
   const csvPath = join(dir, 'data.csv');
   const day14Path = join(dir, 'day14.parquet');
@@ -91,9 +94,15 @@ async function generateFixtures() {
   await conn.run(`COPY (${salesMar2024}) TO '${salesMar2024Path}' (FORMAT PARQUET)`);
   await conn.run(`COPY (${salesApr2024}) TO '${salesApr2024Path}' (FORMAT PARQUET)`);
   await conn.run(`COPY (${salesJan2025}) TO '${salesJan2025Path}' (FORMAT PARQUET)`);
+  await writeAvroFile(avroPath, [
+    { id: 1, event_type: 'login', region: 'us-east' },
+    { id: 2, event_type: 'logout', region: 'us-west' },
+    { id: 3, event_type: 'purchase', region: 'eu-west' },
+  ]);
 
   return {
     dir,
+    avroPath,
     parquetPath,
     csvPath,
     day14Path,
@@ -120,6 +129,7 @@ async function upload(bucket, key, filePath) {
 
 const {
   dir,
+  avroPath,
   parquetPath,
   csvPath,
   day14Path,
@@ -140,6 +150,7 @@ const {
 await Promise.all([createBucket(BUCKET), createBucket(BUCKET_2)]);
 
 await Promise.all([
+  upload(BUCKET, 'reports/events.avro', avroPath),
   upload(BUCKET, 'reports/summary.parquet', parquetPath),
   upload(BUCKET, 'reports/summary.csv', csvPath),
   upload(BUCKET, 'reports/2024/summary.parquet', parquetPath),
@@ -160,3 +171,16 @@ await Promise.all([
 ]);
 
 await rm(dir, { recursive: true });
+
+function writeAvroFile(filePath, records) {
+  const schema = avro.Type.forValue(records[0]);
+  return new Promise((resolve, reject) => {
+    const encoder = new avro.streams.BlockEncoder(schema);
+    const out = createWriteStream(filePath);
+    encoder.pipe(out);
+    records.forEach((record) => encoder.write(record));
+    encoder.end();
+    out.on('finish', () => resolve(filePath));
+    out.on('error', reject);
+  });
+}

@@ -541,7 +541,7 @@ describe('S3', () => {
   });
 
   describe('processFile', () => {
-    it('resolves with the file path when plugins process the file successfully', async () => {
+    it('resolves with the file path when a plugin returns the same file', async () => {
       const s3 = new S3({
         accessKeyId: '123',
         secretAccessKey: 'secret',
@@ -563,6 +563,18 @@ describe('S3', () => {
       });
 
       assert.strictEqual(await s3.processFile('./data.parquet'), './data.parquet');
+    });
+
+    it('resolves with the processed path when a plugin transforms the file', async () => {
+      const s3 = new S3({
+        accessKeyId: '123',
+        secretAccessKey: 'secret',
+        endpoint: 'http://s3.com',
+        bucket: 'test',
+        plugins: [{ processFile: (file) => Promise.resolve(file.replace('.avro', '.json')) }],
+      });
+
+      assert.strictEqual(await s3.processFile('./events.avro'), './events.json');
     });
   });
 

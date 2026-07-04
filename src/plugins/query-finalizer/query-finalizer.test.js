@@ -69,6 +69,20 @@ describe('QueryFinalizerPlugin', () => {
       assert.ok(!result.includes('/mnt/s3/bucket-b/data.parquet'));
     });
 
+    it('substitutes the processed file path when sqlFileReference extension differs from file (e.g. avro → json)', () => {
+      const query = `SELECT * FROM read_json('reports/events.json')`;
+      const fileSettings = [
+        { sqlFileReference: 'reports/events.avro', file: 'reports/events.avro', bucket: 'my-bucket' },
+        { sqlFileReference: 'reports/events.json', file: 'reports/events.avro', bucket: 'my-bucket' },
+      ];
+      const downloadedPaths = ['/mnt/s3/my-bucket/reports/events.json'];
+
+      const result = plugin.finalizeQuery(query, fileSettings, downloadedPaths, BUCKETS_DIR);
+
+      assert.ok(result.includes('/mnt/s3/my-bucket/reports/events.json'));
+      assert.ok(!result.includes("'reports/events.json'"));
+    });
+
     it('removes endpoint and bucket location tokens from the finalized query', () => {
       const query = `SELECT * FROM read_parquet('{endpoint:http://s3.example.com}/{bucket:my-bucket}/data.parquet')`;
       const fileSettings = [

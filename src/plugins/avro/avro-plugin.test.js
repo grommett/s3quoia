@@ -111,15 +111,23 @@ describe('AvroPlugin', () => {
 
     it('resolves with the json file path after decoding the avro file', async () => {
       const fileStream = {
+        write() {},
+        end() {},
         on(event, callback) {
           if (event === 'close') process.nextTick(callback);
+          return this;
+        },
+      };
+      const decoder = {
+        on(event, callback) {
+          if (event === 'end') process.nextTick(callback);
           return this;
         },
       };
       const AvroPluginMocked = await esmock('./avro-plugin.js', {
         'node:fs': { createWriteStream: () => fileStream },
         'node:fs/promises': { stat: () => Promise.reject(new Error('not found')) },
-        avsc: { createFileDecoder: () => ({ pipe: () => {} }) },
+        avsc: { createFileDecoder: () => decoder },
       });
       const plugin = new AvroPluginMocked();
       const result = await plugin.processFile('/data/events.avro');
@@ -129,6 +137,37 @@ describe('AvroPlugin', () => {
 
     it('rejects when the output stream emits an error', async () => {
       const fileStream = {
+        write() {},
+        end() {},
+        on(event, callback) {
+          if (event === 'error') process.nextTick(callback);
+          return this;
+        },
+      };
+      const decoder = {
+        on(_event, _callback) {
+          return this;
+        },
+      };
+      const AvroPluginMocked = await esmock('./avro-plugin.js', {
+        'node:fs': { createWriteStream: () => fileStream },
+        'node:fs/promises': { stat: () => Promise.reject(new Error('not found')) },
+        avsc: { createFileDecoder: () => decoder },
+      });
+      const plugin = new AvroPluginMocked();
+
+      await assert.rejects(plugin.processFile('/data/events.avro'), /Error converting avro/);
+    });
+
+    it('rejects when the decoder emits an error', async () => {
+      const fileStream = {
+        write() {},
+        end() {},
+        on() {
+          return this;
+        },
+      };
+      const decoder = {
         on(event, callback) {
           if (event === 'error') process.nextTick(callback);
           return this;
@@ -137,7 +176,7 @@ describe('AvroPlugin', () => {
       const AvroPluginMocked = await esmock('./avro-plugin.js', {
         'node:fs': { createWriteStream: () => fileStream },
         'node:fs/promises': { stat: () => Promise.reject(new Error('not found')) },
-        avsc: { createFileDecoder: () => ({ pipe: () => {} }) },
+        avsc: { createFileDecoder: () => decoder },
       });
       const plugin = new AvroPluginMocked();
 
