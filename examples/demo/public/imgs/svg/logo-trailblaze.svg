@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="S3quoia trail blaze S mark">
+  <rect x="50" y="22" width="100" height="156" rx="16" fill="#F4F1DE" stroke="#1B4332" stroke-width="6"></rect>
+  <line x1="62" y1="150" x2="138" y2="150" stroke="#1B4332" stroke-width="1.6" opacity="0.3"></line>
+  <line x1="58" y1="161" x2="142" y2="161" stroke="#1B4332" stroke-width="1.6" opacity="0.3"></line>
+  <path d="M126 54 C 84 54, 84 96, 100 100 C 116 104, 116 146, 74 146" fill="none" stroke="#E07A5F" stroke-width="9" stroke-linecap="round"></path>
+  <circle cx="126" cy="54" r="4" fill="#1B4332"></circle>
+  <circle cx="74" cy="146" r="4" fill="#1B4332"></circle>
+</svg>

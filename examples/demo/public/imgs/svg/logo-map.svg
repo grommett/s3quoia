@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160" role="img" aria-label="S3quoia folded field map mark">
+  <rect x="22" y="34" width="156" height="92" rx="4" fill="none" stroke="#1B4332" stroke-width="7"></rect>
+  <line x1="74" y1="34" x2="74" y2="126" stroke="#1B4332" stroke-width="2.5" stroke-dasharray="5 6" opacity="0.5"></line>
+  <line x1="126" y1="34" x2="126" y2="126" stroke="#1B4332" stroke-width="2.5" stroke-dasharray="5 6" opacity="0.5"></line>
+  <path d="M30 106 C 70 92, 120 114, 172 98" fill="none" stroke="#1B4332" stroke-width="1.6" opacity="0.4"></path>
+  <path d="M30 118 C 70 106, 120 126, 172 112" fill="none" stroke="#1B4332" stroke-width="1.6" opacity="0.4"></path>
+  <path d="M44 112 C 72 60, 120 120, 150 58" fill="none" stroke="#E07A5F" stroke-width="4.5" stroke-dasharray="1.5 7" stroke-linecap="round"></path>
+  <circle cx="44" cy="112" r="5" fill="#1B4332"></circle>
+  <circle cx="150" cy="56" r="11" fill="#E07A5F"></circle>
+  <circle cx="150" cy="56" r="4" fill="#F4F1DE"></circle>
+</svg>

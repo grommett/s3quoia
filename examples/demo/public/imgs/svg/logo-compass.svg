@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="S3quoia field compass mark">
+  <circle cx="100" cy="100" r="84" fill="#F4F1DE" stroke="#1B4332" stroke-width="6"></circle>
+  <circle cx="100" cy="100" r="68" fill="none" stroke="#1B4332" stroke-width="1.5" opacity="0.35"></circle>
+  <g stroke="#1B4332" stroke-width="3" stroke-linecap="round">
+    <line x1="100" y1="22" x2="100" y2="34"></line><line x1="100" y1="166" x2="100" y2="178"></line>
+    <line x1="22" y1="100" x2="34" y2="100"></line><line x1="166" y1="100" x2="178" y2="100"></line>
+  </g>
+  <polygon points="100,46 114,100 86,100" fill="#E07A5F"></polygon>
+  <polygon points="100,154 114,100 86,100" fill="#1B4332" opacity="0.85"></polygon>
+  <circle cx="100" cy="100" r="5" fill="#F4F1DE" stroke="#1B4332" stroke-width="2.5"></circle>
+</svg>
