@@ -41,14 +41,6 @@ header, main {
   font-size: 16px;
 }
 
-.demo-theme-toggle {
-  align-self: center;
-  font-size: 18px;
-  line-height: 1;
-  margin-left: auto;
-  padding: 6px 10px;
-}
-
 .demo-tagline {
   color: var(--maple);
   font-weight: 600;

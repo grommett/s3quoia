@@ -307,16 +307,6 @@ exampleBtns[0]?.classList.add('active');
 document.getElementById('runBtn').addEventListener('click', runQuery);
 window.addEventListener('resize', () => editor.layout());
 
-const themeToggle = document.getElementById('themeToggle');
-themeToggle.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀' : '☾';
-themeToggle.addEventListener('click', () => {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = isDark ? '' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('s3q-theme', next);
-  themeToggle.textContent = next === 'dark' ? '☀' : '☾';
-});
-
 runQuery();
 
 function getConfig() {
