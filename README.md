@@ -1,5 +1,7 @@
 # S3quoia
 
+![S3quoia](.github/social-preview.png)
+
 **Massive Data. Clear Trails.**
 
 S3quoia is a DuckDB optimization proxy for S3-compatible storage. Write a single SQL query with date tokens, S3quoia resolves the partition paths, downloads only what you need, caches the files locally, executes with DuckDB, and leaves no trace. No infrastructure required.

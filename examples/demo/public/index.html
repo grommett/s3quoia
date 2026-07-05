@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>s3-querier demo</title>
+    <title>S3quoia — Field Demo</title>
+    <link rel="stylesheet" href="s3quoia.css" />
     <link rel="stylesheet" href="style.css" />
     <link
       rel="stylesheet"
@@ -11,66 +12,92 @@
     />
   </head>
   <body>
+    <img class="bg-wavy" src="imgs/svg/wavy-lines.svg" aria-hidden="true" alt="" />
     <header class="demo-header">
-      <h1 class="demo-title">s3-querier demo</h1>
-      <p class="demo-subtitle">Query parquet files on S3-compatible storage with DuckDB SQL</p>
+      <div class="demo-header-inner">
+        <div class="demo-header-brand">
+          <img src="imgs/svg/logo-map.svg" class="demo-logo" alt="" aria-hidden="true" />
+          <h1 class="heading-display">S3quoia</h1>
+          <p class="demo-subtitle demo-tagline">Massive Data. Clear Trails.</p>
+        </div>
+      </div>
     </header>
 
     <main class="demo-main">
-      <section class="demo-config">
-        <h2 class="demo-section-title">Connection</h2>
+      <section class="demo-config card">
+        <div class="demo-section-header">
+          <h2 class="heading-section">Connection</h2>
+          <span class="demo-indicator" id="connectionIndicator">
+            <span class="demo-indicator-dot"></span>
+            Ranger Station
+          </span>
+        </div>
         <div class="demo-fields">
-          <label class="demo-label">
+          <label class="form-field">
             Endpoint
-            <input class="demo-input" id="endpoint" type="text" value="http://localhost:9000" />
+            <input class="input" id="endpoint" type="text" value="http://localhost:9000" />
           </label>
-          <label class="demo-label">
+          <label class="form-field">
             Bucket
-            <input class="demo-input" id="bucket" type="text" value="demo" />
+            <input class="input" id="bucket" type="text" value="demo" />
           </label>
-          <label class="demo-label">
+          <label class="form-field">
             Access Key ID
-            <input class="demo-input" id="accessKeyId" type="text" value="minioadmin" />
+            <input class="input" id="accessKeyId" type="text" value="minioadmin" />
           </label>
-          <label class="demo-label">
+          <label class="form-field">
             Secret Access Key
-            <input class="demo-input" id="secretAccessKey" type="password" value="minioadmin" />
+            <input class="input" id="secretAccessKey" type="password" value="minioadmin" />
           </label>
-          <label class="demo-label">
+          <label class="form-field">
             IBM API Key
-            <input class="demo-input" id="apiKey" type="password" placeholder="IAM API key (overrides HMAC creds)" />
+            <input class="input" id="apiKey" type="password" placeholder="IAM API key (overrides HMAC creds)" />
           </label>
         </div>
       </section>
 
       <section class="demo-editor-section">
         <div class="demo-editor-header">
-          <h2 class="demo-section-title">SQL</h2>
+          <h2 class="heading-section">Query</h2>
           <div class="demo-examples">
-            <span class="demo-examples-label">Examples:</span>
-            <button class="demo-example-btn" data-query="all-sales">All sales</button>
-            <button class="demo-example-btn" data-query="by-product">By product</button>
-            <button class="demo-example-btn" data-query="by-region">By region</button>
-            <button class="demo-example-btn" data-query="products">Products</button>
-            <button class="demo-example-btn" data-query="join">Sales + products</button>
+            <span class="demo-examples-label">Trail markers:</span>
+            <button class="btn btn-ghost" data-query="all-sales">All sales</button>
+            <button class="btn btn-ghost" data-query="by-product">By product</button>
+            <button class="btn btn-ghost" data-query="by-region">By region</button>
+            <button class="btn btn-ghost" data-query="products">Products</button>
+            <button class="btn btn-ghost" data-query="join">Sales + products</button>
           </div>
         </div>
-        <div id="editor" class="demo-editor"></div>
+        <div class="demo-editor-chrome">
+          <div class="demo-chrome-bar">
+            <div class="demo-chrome-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="demo-chrome-title">Fire Lookout</span>
+          </div>
+          <div id="editor" class="demo-editor"></div>
+        </div>
         <div class="demo-run-row">
-          <button class="demo-run-btn" id="runBtn">Run query</button>
+          <button class="btn btn-primary" id="runBtn">&#9654; Run query</button>
           <label class="demo-format-label">
             Format
-            <select class="demo-format-select" id="format">
+            <select class="select" id="format" style="width: auto;">
               <option value="jsonRecords">jsonRecords</option>
               <option value="columnar">columnar (default)</option>
             </select>
           </label>
-          <span class="demo-status" id="status"></span>
+          <span class="status" id="status"></span>
         </div>
       </section>
 
       <section class="demo-results-section">
-        <h2 class="demo-section-title">Results</h2>
+        <div class="demo-section-header">
+          <h2 class="heading-section">Results</h2>
+          <span class="demo-indicator demo-indicator--hidden" id="cacheIndicator">
+            <span class="demo-indicator-dot"></span>
+            Basecamp Depot
+          </span>
+        </div>
         <div id="results" class="demo-results"></div>
       </section>
     </main>
@@ -80,7 +107,7 @@
       require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.0/min/vs' } });
       require(['vs/editor/editor.main'], function () {
         const script = document.createElement('script');
-        script.src = 'app.js';
+        script.src = 'app.js?v=' + Date.now();
         document.body.appendChild(script);
       });
     </script>
