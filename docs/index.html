@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S3quoia — Massive data. Clear trails.</title>
+  <meta name="description" content="A DuckDB optimization proxy for S3 — smart path pruning, local caching, and an MCP server in a single npm package.">
+  <link rel="stylesheet" href="s3quoia.css">
+  <style>
+    body {
+      background: #e6e1c8;
+      padding: 56px 0;
+    }
+
+    .lp-page {
+      width: 1200px;
+      margin: 0 auto;
+      background: var(--paper);
+      color: var(--text);
+      overflow: hidden;
+      border: 2px solid var(--forest);
+      box-shadow: 14px 16px 0 rgba(46, 74, 62, 0.18);
+    }
+
+    /** Hero */
+
+    .lp-hero {
+      background: var(--forest);
+      color: var(--paper);
+      padding: 52px;
+      position: relative;
+    }
+
+    .lp-hero-inner {
+      border: 3px double rgba(244, 241, 222, 0.55);
+      padding: 48px 44px;
+      text-align: center;
+      position: relative;
+    }
+
+    .lp-hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #cdbf94;
+    }
+
+    .lp-hero-lockup {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 26px;
+    }
+
+    .lp-wordmark {
+      font-family: var(--font-display);
+      font-size: 96px;
+      line-height: 0.84;
+      color: var(--paper);
+      letter-spacing: -0.02em;
+      text-align: left;
+    }
+
+    .lp-hero-tagline {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 26px;
+      color: var(--maple);
+      margin-top: 22px;
+    }
+
+    .lp-hero-desc {
+      font-size: 18px;
+      line-height: 1.5;
+      color: rgba(244, 241, 222, 0.85);
+      margin: 16px auto 0;
+      max-width: 600px;
+    }
+
+    .lp-hero-ctas {
+      display: flex;
+      gap: 16px;
+      margin-top: 30px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .lp-btn-github {
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--forest);
+      background: var(--maple);
+      padding: 15px 26px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.25);
+    }
+
+    .lp-btn-install {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--paper);
+      border: 2px solid rgba(244, 241, 222, 0.5);
+      padding: 14px 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      background: none;
+      user-select: all;
+    }
+
+    .lp-btn-install-icon {
+      color: var(--maple);
+    }
+
+    /** Sections */
+
+    .lp-section {
+      padding: 52px 56px;
+    }
+
+    .lp-section + .lp-section {
+      padding-top: 8px;
+    }
+
+    .lp-section-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      line-height: 1.4;
+      text-transform: uppercase;
+      color: var(--maple);
+      border-top: 2px solid var(--forest);
+      padding-top: 14px;
+      margin-bottom: 26px;
+    }
+
+    .lp-section-heading {
+      font-family: var(--font-display);
+      font-size: 34px;
+      line-height: 1.05;
+      color: var(--heading);
+    }
+
+    .lp-section-body {
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--text);
+      margin: 16px 0 0;
+    }
+
+    /** Get started */
+
+    .lp-getstarted-grid {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .lp-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      list-style: none;
+      margin: 22px 0 0;
+      padding: 0;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--forest);
+    }
+
+    /** Editor chrome */
+
+    .lp-editor {
+      border: var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .lp-editor-bar {
+      background: var(--forest);
+      padding: 9px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lp-editor-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .lp-editor-filename {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--paper);
+      margin-left: 6px;
+    }
+
+    .lp-editor-code {
+      margin: 0;
+      background: #232539;
+      color: var(--paper);
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.7;
+      padding: 22px 24px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .lp-code-kw { color: #74A892; }
+    .lp-code-str { color: #cdbf94; }
+    .lp-code-token { color: var(--maple); }
+
+    /** Feature cards */
+
+    .lp-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 26px;
+    }
+
+    .lp-feature-card {
+      background: var(--surface);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 28px 30px;
+      display: flex;
+      gap: 22px;
+      align-items: flex-start;
+    }
+
+    .lp-feature-icon {
+      flex: none;
+      width: 60px;
+      height: 60px;
+    }
+
+    .lp-feature-title {
+      font-family: var(--font-display);
+      font-size: 21px;
+      color: var(--heading);
+    }
+
+    .lp-feature-desc {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text-soft);
+      margin: 9px 0 0;
+    }
+
+    /** Comparison table */
+
+    .lp-compare {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .lp-compare thead th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      padding: 12px 6px 10px;
+      text-align: left;
+    }
+
+    .lp-compare thead .lp-compare-duck,
+    .lp-compare thead .lp-compare-s3q {
+      text-align: center;
+      width: 210px;
+    }
+
+    .lp-compare thead .lp-compare-s3q {
+      color: var(--maple);
+    }
+
+    .lp-compare tbody td {
+      padding: 20px 6px;
+      border-top: 1px solid rgba(46, 74, 62, 0.2);
+    }
+
+    .lp-compare tbody tr:last-child td {
+      border-bottom: 1px solid rgba(46, 74, 62, 0.2);
+    }
+
+    .lp-compare-num {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-soft);
+      width: 34px;
+    }
+
+    .lp-compare-feature {
+      font-family: var(--font-display);
+      font-size: 19px;
+      color: var(--heading);
+    }
+
+    .lp-compare-val {
+      width: 210px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .lp-compare-val--no { color: #b0663f; }
+    .lp-compare-val--yes { color: var(--forest); font-weight: 700; }
+
+    /** MCP band */
+
+    .lp-band {
+      position: relative;
+      background: var(--charcoal);
+      color: var(--paper);
+      padding: 56px 56px 60px;
+      overflow: hidden;
+    }
+
+    .lp-band-content {
+      position: relative;
+      max-width: 760px;
+    }
+
+    .lp-band-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--maple);
+    }
+
+    .lp-band-heading {
+      font-family: var(--font-display);
+      font-size: 44px;
+      line-height: 1.02;
+      margin-top: 14px;
+      color: var(--paper);
+    }
+
+    .lp-band-desc {
+      font-size: 18px;
+      line-height: 1.55;
+      color: rgba(244, 241, 222, 0.82);
+      margin: 16px 0 0;
+    }
+
+    .lp-band-cmd {
+      display: block;
+      margin: 24px 0 0;
+      background: #161622;
+      color: var(--paper);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 16px 20px;
+      border-left: 3px solid var(--maple);
+      white-space: pre;
+    }
+
+    .lp-band-badges {
+      display: flex;
+      gap: 12px;
+      list-style: none;
+      margin: 22px 0 0;
+      padding: 0;
+      flex-wrap: wrap;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .lp-band-badge {
+      border: 1px solid rgba(244, 241, 222, 0.35);
+      padding: 7px 13px;
+      color: var(--paper);
+    }
+
+    /** Footer */
+
+    .lp-footer {
+      background: var(--surface);
+      border-top: var(--border);
+      padding: 28px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--forest);
+    }
+
+    .lp-footer-wordmark {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: -0.01em;
+      color: var(--forest);
+    }
+
+    .lp-footer a {
+      color: var(--maple);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="lp-page">
+
+  <header class="lp-hero">
+    <div class="lp-hero-inner">
+      <p class="lp-hero-eyebrow">Data Forestry Service · Field Manual No. 3</p>
+
+      <div class="lp-hero-lockup">
+        <svg viewBox="0 0 200 240" style="width: 120px; height: 150px;" role="img" aria-label="Fire lookout tower">
+          <g stroke="#f4f1de" stroke-width="5" stroke-linecap="round" fill="none">
+            <line x1="52" y1="220" x2="80" y2="96"/>
+            <line x1="148" y1="220" x2="120" y2="96"/>
+            <line x1="62" y1="176" x2="138" y2="176"/>
+            <line x1="70" y1="136" x2="130" y2="136"/>
+            <line x1="52" y1="220" x2="120" y2="96"/>
+            <line x1="148" y1="220" x2="80" y2="96"/>
+          </g>
+          <rect x="66" y="56" width="68" height="42" fill="#2e4a3e" stroke="#f4f1de" stroke-width="5"/>
+          <line x1="100" y1="56" x2="100" y2="98" stroke="#f4f1de" stroke-width="3"/>
+          <line x1="66" y1="77" x2="134" y2="77" stroke="#f4f1de" stroke-width="3"/>
+          <polygon points="56,56 100,28 144,56" fill="#e07a5f" stroke="#f4f1de" stroke-width="5" stroke-linejoin="round"/>
+          <line x1="100" y1="28" x2="100" y2="12" stroke="#f4f1de" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h1 class="lp-wordmark">S3quoia</h1>
+      </div>
+
+      <p class="lp-hero-tagline">Massive data. Clear trails.</p>
+      <p class="lp-hero-desc">An S3 query engine — accurate and simple. With local caching, an MCP server, and a 1 GB scan guardrail.</p>
+
+      <div class="lp-hero-ctas">
+        <a href="https://github.com/grommett/s3quoia" class="lp-btn-github">★ View on GitHub</a>
+        <span class="lp-btn-install">$ npm install s3quoia <span class="lp-btn-install-icon">⧉</span></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="lp-section">
+    <h2 class="lp-section-label">§ 01 · Get on the trail</h2>
+    <div class="lp-getstarted-grid">
+      <div>
+        <h3 class="lp-section-heading">Running in minutes</h3>
+        <p class="lp-section-body">Point it at your bucket, write SQL with date tokens, get results. No cluster, no config server — just a package.</p>
+        <ol class="lp-steps">
+          <li>① &nbsp;npm install s3quoia</li>
+          <li>② &nbsp;point at your S3 bucket</li>
+          <li>③ &nbsp;query with {yyyy}/{MM}/{dd} tokens</li>
+        </ol>
+      </div>
+      <div class="lp-editor">
+        <div class="lp-editor-bar">
+          <span class="lp-editor-dot" style="background: var(--maple);"></span>
+          <span class="lp-editor-dot" style="background: var(--paper); opacity: 0.45;"></span>
+          <span class="lp-editor-dot" style="background: var(--paper); opacity: 0.45;"></span>
+          <span class="lp-editor-filename">lake.js</span>
+        </div>
+        <pre class="lp-editor-code"><span class="lp-code-kw">import</span> s3quoia <span class="lp-code-kw">from</span> <span class="lp-code-str">'s3quoia'</span>;
+
+<span class="lp-code-kw">const</span> rows = <span class="lp-code-kw">await</span> s3quoia({
+  accessKeyId: process.env.<span class="lp-code-str">S3_ACCESS_KEY_ID</span>,
+  secretAccessKey: process.env.<span class="lp-code-str">S3_SECRET_ACCESS_KEY</span>,
+  defaultEndpoint: process.env.<span class="lp-code-str">S3_ENDPOINT</span>,
+  defaultBucket: <span class="lp-code-str">'events'</span>,
+  bucketsDir: <span class="lp-code-str">'/tmp/s3-cache'</span>,
+  from: <span class="lp-code-kw">new</span> Date(<span class="lp-code-str">'2025-01-01'</span>).getTime(),
+  to: <span class="lp-code-kw">new</span> Date(<span class="lp-code-str">'2025-01-31'</span>).getTime(),
+  query: <span class="lp-code-str">`SELECT region, COUNT(*) AS hits
+  FROM read_parquet(
+    'events/<span class="lp-code-token">{yyyy}</span>/<span class="lp-code-token">{MM}</span>/<span class="lp-code-token">{dd}</span>/*.parquet'
+  )
+  GROUP BY region`</span>,
+  format: <span class="lp-code-str">'jsonRecords'</span>,
+});</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <h2 class="lp-section-label">§ 02 · Standard Issue Equipment</h2>
+    <div class="lp-card-grid">
+
+      <article class="lp-feature-card">
+        <div class="lp-feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#2e4a3e" stroke-width="5"/>
+            <polygon points="50,22 59,50 50,50" fill="#e07a5f"/>
+            <polygon points="50,78 41,50 50,50" fill="#2e4a3e"/>
+            <circle cx="50" cy="50" r="4" fill="#f4f1de" stroke="#2e4a3e" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="lp-feature-title">Time-range queries</h3>
+          <p class="lp-feature-desc">Give it a from/to range and S3quoia reads only the Hive partitions inside it — resolving <code style="font-family: var(--font-mono); color: var(--maple);">{yyyy}/{MM}/{dd}</code> paths for you. No manual globbing, no over-fetching.</p>
+        </div>
+      </article>
+
+      <article class="lp-feature-card">
+        <div class="lp-feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <polygon points="50,22 84,84 16,84" fill="none" stroke="#2e4a3e" stroke-width="5" stroke-linejoin="round"/>
+            <polygon points="50,44 62,84 38,84" fill="#e07a5f"/>
+            <line x1="50" y1="16" x2="50" y2="22" stroke="#2e4a3e" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="lp-feature-title">Local disk cache</h3>
+          <p class="lp-feature-desc">Downloaded files are cached and reused across queries. Automatic eviction keeps disk usage in check — repeat queries skip S3 entirely.</p>
+        </div>
+      </article>
+
+      <article class="lp-feature-card">
+        <div class="lp-feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <g stroke="#2e4a3e" stroke-width="5" fill="none" stroke-linecap="round">
+              <line x1="34" y1="86" x2="48" y2="30"/>
+              <line x1="66" y1="86" x2="52" y2="30"/>
+              <line x1="40" y1="60" x2="60" y2="60"/>
+              <line x1="44" y1="44" x2="56" y2="44"/>
+              <line x1="50" y1="30" x2="50" y2="18"/>
+            </g>
+            <g stroke="#e07a5f" stroke-width="3" fill="none" stroke-linecap="round">
+              <path d="M58 14 A14 14 0 0 1 70 26"/>
+              <path d="M62 8 A22 22 0 0 1 78 28"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <h3 class="lp-feature-title">Built-in MCP server</h3>
+          <p class="lp-feature-desc">Connect Claude or any MCP-compatible client to your data lake with a single <code style="font-family: var(--font-mono); color: var(--maple);">npx</code> command. No server to provision.</p>
+        </div>
+      </article>
+
+      <article class="lp-feature-card">
+        <div class="lp-feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+            <g stroke="#2e4a3e" stroke-width="5" fill="none" stroke-linecap="round">
+              <circle cx="26" cy="50" r="14"/>
+              <circle cx="74" cy="50" r="14"/>
+            </g>
+            <line x1="40" y1="50" x2="60" y2="50" stroke="#e07a5f" stroke-width="5" stroke-linecap="round"/>
+            <polygon points="56,43 64,50 56,57" fill="#e07a5f"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="lp-feature-title">Cross-bucket joins</h3>
+          <p class="lp-feature-desc">Reference multiple S3 buckets in a single query using the same clean date-token syntax. No manual URI construction — as long as your buckets share credentials, S3quoia handles the rest.</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <h2 class="lp-section-label">§ 03 · Why not just DuckDB + S3?</h2>
+    <table class="lp-compare">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Capability</th>
+          <th class="lp-compare-duck">DuckDB + S3</th>
+          <th class="lp-compare-s3q">S3quoia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="lp-compare-num">01</td>
+          <td class="lp-compare-feature">Time-partition path pruning</td>
+          <td class="lp-compare-val lp-compare-val--no">manual globbing</td>
+          <td class="lp-compare-val lp-compare-val--yes">automatic ✓</td>
+        </tr>
+        <tr>
+          <td class="lp-compare-num">02</td>
+          <td class="lp-compare-feature">Local disk cache + eviction</td>
+          <td class="lp-compare-val lp-compare-val--no">✕</td>
+          <td class="lp-compare-val lp-compare-val--yes">built in ✓</td>
+        </tr>
+        <tr>
+          <td class="lp-compare-num">03</td>
+          <td class="lp-compare-feature">MCP server for AI clients</td>
+          <td class="lp-compare-val lp-compare-val--no">✕</td>
+          <td class="lp-compare-val lp-compare-val--yes">one command ✓</td>
+        </tr>
+        <tr>
+          <td class="lp-compare-num">04</td>
+          <td class="lp-compare-feature">Runaway-scan guardrail</td>
+          <td class="lp-compare-val lp-compare-val--no">✕</td>
+          <td class="lp-compare-val lp-compare-val--yes">1 GB cap ✓</td>
+        </tr>
+        <tr>
+          <td class="lp-compare-num">05</td>
+          <td class="lp-compare-feature">Cross-bucket joins</td>
+          <td class="lp-compare-val lp-compare-val--no">manual URI construction</td>
+          <td class="lp-compare-val lp-compare-val--yes">date-token syntax ✓</td>
+        </tr>
+        <tr>
+          <td class="lp-compare-num">06</td>
+          <td class="lp-compare-feature">Concurrent duplicate downloads</td>
+          <td class="lp-compare-val lp-compare-val--no">same file, twice</td>
+          <td class="lp-compare-val lp-compare-val--yes">lock queue ✓</td>
+        </tr>
+        <tr>
+          <td class="lp-compare-num">07</td>
+          <td class="lp-compare-feature">Setup</td>
+          <td class="lp-compare-val lp-compare-val--no">wire it yourself</td>
+          <td class="lp-compare-val lp-compare-val--yes">npm install ✓</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="lp-band">
+    <img src="topo-mountains.svg" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.14;" aria-hidden="true" alt="">
+    <div class="lp-band-content">
+      <p class="lp-band-eyebrow">The Ranger Station</p>
+      <h2 class="lp-band-heading">Ask your data lake a&nbsp;question.</h2>
+      <p class="lp-band-desc">S3quoia ships a Model Context Protocol server. Connect Claude Desktop, Claude Code, or any MCP client and query your S3 data in plain language.</p>
+      <code class="lp-band-cmd">$ claude mcp add s3quoia \
+  -e S3_ENDPOINT=https://s3.amazonaws.com \
+  -e S3_BUCKET=my-bucket \
+  -e S3_ACCESS_KEY_ID=key \
+  -e S3_SECRET_ACCESS_KEY=secret \
+  -- npx -y s3quoia</code>
+      <ul class="lp-band-badges">
+        <li class="lp-band-badge">Claude Code</li>
+        <li class="lp-band-badge">Claude Desktop</li>
+        <li class="lp-band-badge">Any MCP client</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="lp-footer">
+    <span class="lp-footer-wordmark">S3quoia</span>
+    <span>MIT License · Built with DuckDB · <a href="https://github.com/grommett/s3quoia">github.com/grommett/s3quoia ↗</a></span>
+  </footer>
+
+</div>
+</body>
+</html>
