@@ -1,6 +1,6 @@
 {
   "name": "s3quoia",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Query S3-compatible storage with DuckDB and SQL",
   "type": "module",
   "main": "src/s3quoia.js",
