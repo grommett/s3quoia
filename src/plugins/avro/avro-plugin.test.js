@@ -135,6 +135,40 @@ describe('AvroPlugin', () => {
       assert.strictEqual(result, '/data/events.json');
     });
 
+    it('writes string records directly so DuckDB infers named columns not MAP', async () => {
+      const written = [];
+      let closeCallback;
+      const fileStream = {
+        write(chunk) {
+          written.push(chunk);
+        },
+        end() {
+          closeCallback();
+        },
+        on(event, callback) {
+          if (event === 'close') closeCallback = callback;
+          return this;
+        },
+      };
+      const event = { context: { eventType: 'rias-ng/instance/deleted' }, data: { resourceId: 'abc' } };
+      const decoder = {
+        on(ev, callback) {
+          if (ev === 'data') process.nextTick(() => callback(JSON.stringify(event)));
+          if (ev === 'end') process.nextTick(() => callback());
+          return this;
+        },
+      };
+      const AvroPluginMocked = await esmock('./avro-plugin.js', {
+        'node:fs': { createWriteStream: () => fileStream },
+        'node:fs/promises': { stat: () => Promise.reject(new Error('not found')) },
+        avsc: { createFileDecoder: () => decoder },
+      });
+      const plugin = new AvroPluginMocked();
+      await plugin.processFile('/data/events.avro');
+
+      assert.deepStrictEqual(JSON.parse(written[0]), event);
+    });
+
     it('rejects when the output stream emits an error', async () => {
       const fileStream = {
         write() {},

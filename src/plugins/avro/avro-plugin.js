@@ -40,7 +40,9 @@ class AvroPlugin extends QueryParserPlugin {
           if (exists) return resolve(jsonFile);
           const fileStream = createWriteStream(jsonFile);
           const decoder = avro.createFileDecoder(file);
-          decoder.on('data', (record) => fileStream.write(JSON.stringify(record) + '\n'));
+          decoder.on('data', (record) =>
+            fileStream.write((typeof record === 'string' ? record : JSON.stringify(record)) + '\n'),
+          );
           decoder.on('end', () => fileStream.end());
           decoder.on('error', () => reject(new Error(errorMsg)));
           fileStream.on('close', () => resolve(jsonFile));
