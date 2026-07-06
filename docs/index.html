@@ -450,7 +450,7 @@
 
       <div class="lp-hero-ctas">
         <a href="https://github.com/grommett/s3quoia" class="lp-btn-github">★ View on GitHub</a>
-        <span class="lp-btn-install">$ npm install s3quoia <span class="lp-btn-install-icon">⧉</span></span>
+        <span class="lp-btn-install" id="js-install-btn" role="button" tabindex="0" title="Copy to clipboard">$ npm install s3quoia <span class="lp-btn-install-icon" id="js-install-icon">⧉</span></span>
       </div>
     </div>
   </header>
@@ -654,5 +654,18 @@
   </footer>
 
 </div>
+  <script>
+    const btn = document.getElementById('js-install-btn');
+    const icon = document.getElementById('js-install-icon');
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText('npm install s3quoia').then(function () {
+        icon.textContent = '✓';
+        setTimeout(function () { icon.textContent = '⧉'; }, 1500);
+      });
+    });
+    btn.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') btn.click();
+    });
+  </script>
 </body>
 </html>
