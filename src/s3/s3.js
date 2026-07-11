@@ -78,7 +78,11 @@ export default class S3 {
     const filesPromises = this.startDownloads(stats, filePaths);
 
     return Promise.allSettled(filesPromises)
-      .then((results) => results.filter((result) => result.value).map((result) => result.value))
+      .then((results) => {
+        const failed = results.find((result) => result.status === 'rejected');
+        if (failed) throw failed.reason;
+        return results.map((result) => result.value);
+      })
       .then(this.resetEnqueued);
   }
 
@@ -333,24 +337,18 @@ export default class S3 {
   downloadFileCache(stats, fileObject) {
     const { file, size } = fileObject;
     const dir = dirname(`${this.mount}/${file}`);
-    return fsPromise
-      .stat(`${this.mount}/${file}`)
-      .then(() => {
+    return fsPromise.stat(`${this.mount}/${file}`).then(
+      () => {
         stats.cacheHits += 1;
         return this.processFile(`${this.mount}/${file}`);
-      })
-      .catch(() => {
-        return fsPromise
-          .mkdir(dir, { recursive: true })
-          .then(() => {
-            stats.cacheMisses += 1;
-            stats.bytesDownloaded += size;
-            return this.objectToFile(file);
-          })
-          .catch(() => {
-            return Promise.reject(file);
-          });
-      });
+      },
+      () =>
+        fsPromise.mkdir(dir, { recursive: true }).then(() => {
+          stats.cacheMisses += 1;
+          stats.bytesDownloaded += size;
+          return this.objectToFile(file);
+        }),
+    );
   }
 
   /**
@@ -363,16 +361,11 @@ export default class S3 {
   downloadFileForced(stats, fileObject) {
     const { file, size } = fileObject;
     const dir = dirname(`${this.mount}/${file}`);
-    return fsPromise
-      .mkdir(dir, { recursive: true })
-      .then(() => {
-        stats.cacheMisses += 1;
-        stats.bytesDownloaded += size;
-        return this.objectToFile(file);
-      })
-      .catch(() => {
-        return Promise.reject(file);
-      });
+    return fsPromise.mkdir(dir, { recursive: true }).then(() => {
+      stats.cacheMisses += 1;
+      stats.bytesDownloaded += size;
+      return this.objectToFile(file);
+    });
   }
 
   /**
