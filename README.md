@@ -4,7 +4,7 @@
 
 **Massive Data. Clear Trails.**
 
-S3quoia is a DuckDB optimization proxy for S3-compatible storage. Write a single SQL query with date tokens, S3quoia resolves the partition paths, downloads only what you need, caches the files locally, executes with DuckDB, and leaves no trace. No infrastructure required.
+S3quoia is an S3 query engine. Write a single SQL query with date tokens, S3quoia resolves the partition paths, downloads only what you need, caches the files locally, executes with DuckDB, and leaves no trace. No infrastructure required.
 
 - **Smart path pruning** — date tokens (`{yyyy}`, `{MM}`, `{dd}`, `{hh}`) expand into exactly the S3 prefixes your time range needs. No over-fetching, no manual path construction.
 - **Local disk cache** — downloaded files are cached and reused across queries. Automatic eviction keeps disk usage in check.
