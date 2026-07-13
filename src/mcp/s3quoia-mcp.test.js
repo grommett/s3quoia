@@ -147,6 +147,16 @@ describe('S3QuoiaMCP', () => {
     assert.ok(toolNames.includes('custom_tool'));
   });
 
+  it('passes name, version, and description overrides to McpServer', async () => {
+    const config = { name: 'my-server', version: '9.9.9', description: 'Custom description' };
+    const { mcp, state } = await buildMcp(config);
+    await mcp.start();
+
+    assert.strictEqual(state.serverOptions.name, 'my-server');
+    assert.strictEqual(state.serverOptions.version, '9.9.9');
+    assert.strictEqual(state.serverOptions.description, 'Custom description');
+  });
+
   it('serves the docs resource as markdown with the correct URI', async () => {
     const { mcp, registrations } = await buildMcp();
     await mcp.start();

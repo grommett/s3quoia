@@ -36,7 +36,7 @@ export class S3QuoiaMCP {
     const server = new McpServer(
       {
         name: this.config.name ?? 's3quoia',
-        version: pkg.version,
+        version: this.config.version ?? pkg.version,
         description: this.config.description ?? pkg.description,
       },
       { instructions: buildInstructions(this.config) },
