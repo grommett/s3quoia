@@ -450,7 +450,7 @@ new S3QuoiaMCP({
 
 ## Examples
 
-The `examples/` directory contains a local interactive demo and standalone scripts. All examples target a local MinIO instance — you'll need [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Both are bundled with Docker Desktop on Mac and Windows; on Linux, install the Compose plugin separately.
+The `examples/` directory contains a local interactive demo. It targets a local MinIO instance — you'll need [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. Both are bundled with Docker Desktop on Mac and Windows; on Linux, install the Compose plugin separately.
 
 ### Interactive demo
 
@@ -465,26 +465,6 @@ Then open [http://localhost:3000](http://localhost:3000). The editor has five pr
 
 ```bash
 npm run demo:down   # stop MinIO
-```
-
-### Standalone scripts
-
-Run any script directly after MinIO is up:
-
-```bash
-npm run demo:up                               # if not already running
-node examples/scripts/basic-query.js         # fetch the first 10 sales rows
-node examples/scripts/glob-pattern.js        # filter to Jan–Feb with a brace glob
-node examples/scripts/date-range.js          # use {from}/{to} date tokens
-node examples/scripts/ibm-cos.js             # IBM Cloud Object Storage (requires env vars)
-```
-
-For the IBM COS script, set these environment variables first:
-
-```bash
-export IBM_COS_API_KEY=your-api-key
-export IBM_COS_ENDPOINT=https://s3.us-south.cloud-object-storage.appdomain.cloud
-export IBM_COS_BUCKET=your-bucket
 ```
 
 ## License
