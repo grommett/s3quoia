@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 import BaseTool from '../base-tool.js';
 import s3quoia, { bigintReplacer } from '../../../s3quoia.js';
-import { resolveDatasetBucket } from '../../utils/utils.js';
 
 const {
   S3_ACCESS_KEY_ID,
@@ -46,9 +45,8 @@ export default class QueryTool extends BaseTool {
   async handler({ sql, from, to, endpoint, bucket }) {
     const fromMs = from ? new Date(from).getTime() : undefined;
     const toMs = to ? new Date(to).getTime() : undefined;
-    const fromDataset = bucket || S3_BUCKET ? {} : resolveDatasetBucket(this.config.datasets, sql);
-    const resolvedEndpoint = endpoint || S3_ENDPOINT || fromDataset.endpoint;
-    const resolvedBucket = bucket || S3_BUCKET || fromDataset.bucket;
+    const resolvedEndpoint = endpoint || S3_ENDPOINT;
+    const resolvedBucket = bucket || S3_BUCKET;
 
     const results = await s3quoia({
       query: sql,

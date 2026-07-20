@@ -8,6 +8,7 @@ import QueryFinalizerPlugin from './plugins/query-finalizer/query-finalizer.js';
 export { default as AvroPlugin } from './plugins/avro/avro-plugin.js';
 export { default as FSPurgePlugin } from './plugins/fs-purge/fs-purge-plugin.js';
 export { default as StatsPlugin } from './plugins/stats/stats-plugin.js';
+export { default as DatasetBucketPlugin } from './plugins/dataset-bucket/dataset-bucket-plugin.js';
 import { processQuery, runFinalizers, runPreQuery, runPostQuery } from './plugins/lifecycle.js';
 
 const listingCache = new LRUCache({ max: 1000 });
