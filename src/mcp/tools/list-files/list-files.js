@@ -6,7 +6,7 @@ import { ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { bigintReplacer } from '../../../utils/bigint-replacer.js';
 import { buildS3Client } from '../../../s3/s3.js';
 import { readParquetColumns } from '../../../utils/parquet-schema-reader.js';
-import { buildDatasetContext, resolveListFilesBucket } from '../../utils/utils.js';
+import { buildDatasetContext } from '../../utils/utils.js';
 
 const { S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY, S3_API_KEY, S3_ENDPOINT, S3_BUCKET } = process.env;
 const listFilesTemplate = readFileSync(new URL('../../descriptions/list-files.md', import.meta.url), 'utf8');
@@ -41,9 +41,8 @@ export default class ListFilesTool extends BaseTool {
   }
 
   async handler({ prefix = '', maxResults = 100, endpoint, bucket }) {
-    const fromDataset = bucket || S3_BUCKET ? {} : resolveListFilesBucket(this.config.datasets, prefix);
-    const resolvedEndpoint = endpoint || S3_ENDPOINT || fromDataset.endpoint;
-    const resolvedBucket = bucket || S3_BUCKET || fromDataset.bucket;
+    const resolvedEndpoint = endpoint || S3_ENDPOINT;
+    const resolvedBucket = bucket || S3_BUCKET;
     const s3Client = buildS3Client({
       apiKey: S3_API_KEY,
       accessKeyId: S3_ACCESS_KEY_ID,

@@ -4,28 +4,6 @@ export function buildDatasetContext(datasets) {
   return ['CONFIGURED DATASETS', '', ...datasetLines].join('\n');
 }
 
-/**
- * Resolves bucket and endpoint for list_files by matching the prefix argument
- * against configured dataset prefixes (startsWith, longest match wins).
- * Falls back to the first dataset that has a bucket when nothing matches.
- *
- * @param {object[]|undefined} datasets
- * @param {string} [prefix='']
- * @returns {{ bucket?: string, endpoint?: string }}
- */
-export function resolveListFilesBucket(datasets, prefix = '') {
-  if (!datasets?.length) return {};
-  const candidates = datasets.filter(({ prefix: dp }) => dp && prefix.startsWith(dp));
-  const match = candidates.length
-    ? candidates.reduce((best, ds) => (ds.prefix.length > best.prefix.length ? ds : best))
-    : (datasets.find((ds) => ds.bucket) ?? null);
-  if (!match) return {};
-  const result = {};
-  if (match.bucket) result.bucket = match.bucket;
-  if (match.endpoint) result.endpoint = match.endpoint;
-  return result;
-}
-
 function formatDataset({ name, description, bucket, endpoint, prefix, filePathTemplate, partitioning, files }) {
   const header = description ? `${name} — ${description}` : name;
   const lines = [header];
