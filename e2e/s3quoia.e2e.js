@@ -4,7 +4,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import s3quoia, { StatsPlugin, AvroPlugin } from '../src/s3quoia.js';
+import s3quoia, { StatsPlugin, AvroPlugin, BucketResolverPlugin } from '../src/s3quoia.js';
 
 const ENDPOINT = 'http://localhost:9000';
 const BUCKET = 'test-bucket';
@@ -432,5 +432,64 @@ describe('s3quoia e2e', () => {
     assert.strictEqual(result[0].event_type, 'login');
     assert.strictEqual(result[0].description, 'user login event');
     assert.strictEqual(result[2].description, 'purchase completed');
+  });
+
+  it('resolves a bucket from datasets via BucketResolverPlugin when no defaultBucket is set', async () => {
+    const datasetDir = await mkdtemp(join(tmpdir(), 's3-e2e-bucket-resolver-'));
+    const datasets = [{ name: 'reports', prefix: 'reports/', bucket: BUCKET }];
+
+    try {
+      const result = await s3quoia({
+        accessKeyId: ACCESS_KEY,
+        secretAccessKey: SECRET_KEY,
+        defaultEndpoint: ENDPOINT,
+        bucketsDir: datasetDir,
+        plugins: [new BucketResolverPlugin(datasets)],
+        from: FROM,
+        to: TO,
+        query: `SELECT * FROM read_parquet('reports/summary.parquet') ORDER BY id`,
+        format: 'jsonRecords',
+      });
+
+      assert.strictEqual(result.length, 3);
+      assert.deepStrictEqual(result[0], { id: 1, event_type: 'login', region: 'us-east', value: 42.5 });
+    } finally {
+      await rm(datasetDir, { recursive: true });
+    }
+  });
+
+  it('joins files from two different buckets resolved independently via BucketResolverPlugin, with no bucket tokens in the query', async () => {
+    const datasetDir = await mkdtemp(join(tmpdir(), 's3-e2e-bucket-resolver-join-'));
+    const datasets = [
+      { name: 'reports', prefix: 'reports/', bucket: BUCKET },
+      { name: 'reference', prefix: 'reference', bucket: BUCKET_2 },
+    ];
+
+    try {
+      const result = await s3quoia({
+        accessKeyId: ACCESS_KEY,
+        secretAccessKey: SECRET_KEY,
+        defaultEndpoint: ENDPOINT,
+        bucketsDir: datasetDir,
+        plugins: [new BucketResolverPlugin(datasets)],
+        from: FROM,
+        to: TO,
+        query: `
+          SELECT s.id, s.event_type, r.description
+          FROM read_parquet('reports/summary.parquet') s
+          JOIN read_parquet('reference.parquet') r ON s.id = r.id
+          ORDER BY s.id
+        `,
+        format: 'jsonRecords',
+      });
+
+      assert.strictEqual(result.length, 3);
+      assert.strictEqual(result[0].id, 1);
+      assert.strictEqual(result[0].event_type, 'login');
+      assert.strictEqual(result[0].description, 'user login event');
+      assert.strictEqual(result[2].description, 'purchase completed');
+    } finally {
+      await rm(datasetDir, { recursive: true });
+    }
   });
 });
