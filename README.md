@@ -233,6 +233,25 @@ const results = await s3quoia({
 });
 ```
 
+### BucketResolverPlugin
+
+When a query references files by relative path (no `{bucket:...}` token) and no `defaultBucket` is set, `BucketResolverPlugin` resolves each file's bucket and endpoint from a list of dataset configs (see [Dataset options](#dataset-options)), matching the file path against each dataset's `prefix`. Resolution runs per file, so a single query can join across datasets in different buckets. Files that don't match any prefix are left unresolved — the existing "no bucket configured" error still applies to them.
+
+```js
+import s3quoia, { BucketResolverPlugin } from 's3quoia';
+
+const datasets = [
+  { name: 'sales', prefix: 'sales/', bucket: 'sales-bucket' },
+  { name: 'logs', prefix: 'logs/raw/', bucket: 'logs-bucket', endpoint: 'https://s3.logs.example.com' },
+];
+
+const results = await s3quoia({
+  // ...
+  plugins: [new BucketResolverPlugin(datasets)],
+  query: `SELECT * FROM read_parquet('sales/year={yyyy}/data.parquet')`,
+});
+```
+
 ## MCP Server
 
 s3quoia ships a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes three tools to any MCP-compatible client (Claude Desktop, Claude Code, IBM Bob etc.):
@@ -405,22 +424,25 @@ new S3QuoiaMCP({
 
 #### Plugins
 
-Pass a `plugins` array to enable `FSPurgePlugin`, `StatsPlugin`, or any custom plugin for every query the server handles:
+Pass a `plugins` array to enable `FSPurgePlugin`, `StatsPlugin`, `BucketResolverPlugin`, or any custom plugin for every query the server handles:
 
 ```js
 import { S3QuoiaMCP } from 's3quoia/mcp';
-import { FSPurgePlugin, StatsPlugin } from 's3quoia';
+import { FSPurgePlugin, StatsPlugin, BucketResolverPlugin } from 's3quoia';
+
+const datasets = [ /* ... */ ];
 
 new S3QuoiaMCP({
-  datasets: [ /* ... */ ],
+  datasets,
   plugins: [
     new FSPurgePlugin({ bucketsDir: '/tmp/s3quoia', lastAccessTTLMinutes: 120 }),
     new StatsPlugin((event) => console.error(event)),
+    new BucketResolverPlugin(datasets),
   ],
 }).start();
 ```
 
-The built-in server (`npx s3quoia`) runs `FSPurgePlugin` and `StatsPlugin` by default. When extending with `S3QuoiaMCP`, plugins are opt-in.
+The built-in server (`npx s3quoia`) runs `FSPurgePlugin` and `StatsPlugin` by default. When extending with `S3QuoiaMCP`, plugins are opt-in — add `BucketResolverPlugin` explicitly if you want queries to auto-resolve a bucket per file from your `datasets` config.
 
 ### Adding custom tools
 
