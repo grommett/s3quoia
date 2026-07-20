@@ -101,7 +101,7 @@ describe('S3QuoiaMCP', () => {
     await mcp.start();
 
     assert.ok(state.serverOptions.instructions.includes('s3quoia://datasets'));
-    assert.ok(state.serverOptions.instructions.includes('LIMIT 1'));
+    assert.ok(state.serverOptions.instructions.includes('get_current_time'));
     assert.ok(state.serverOptions.instructions.includes('Never guess column names'));
     assert.ok(!state.serverOptions.instructions.startsWith('Step 1: Use list_files'));
   });

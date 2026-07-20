@@ -18,10 +18,10 @@ Step 4: Query using the correct file paths discovered in Step 1.
 `.trim();
 
 const DATASETS_INSTRUCTIONS = `
-Step 1: Read the s3quoia://datasets resource to see available datasets and their S3 paths.
-Step 2: Review the datasets to identify which are relevant to the request.
-Step 3: Never guess column names. Run SELECT * FROM read_parquet('full_path') LIMIT 1 on each relevant file to inspect the schema — for time-partitioned paths, call get_current_time first to construct a valid path.
-Step 4: Query the relevant datasets directly — do not use list_files to explore the bucket.
+Step 1: Call get_current_time to get the current UTC time — always do this first for any time-partitioned dataset before constructing paths or queries.
+Step 2: Read the s3quoia://datasets resource to see available datasets and their S3 paths.
+Step 3: Identify the relevant dataset(s). Never guess column names — the datasets resource lists key columns per file type.
+Step 4: Query the relevant datasets directly using the correct from/to range. Do not use list_files to explore the bucket.
 `.trim();
 
 export class S3QuoiaMCP {
