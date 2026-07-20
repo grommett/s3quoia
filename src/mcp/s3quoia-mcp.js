@@ -8,8 +8,6 @@ import CurentTimeTool from './tools/current-time/current-time.js';
 
 import S3QuoiaDocsResource from './resources/s3quoia-docs/s3quoia-docs.js';
 import S3QuoiaDatasetsResource from './resources/s3quoia-datasets/s3quoia-datasets.js';
-import DatasetBucketPlugin from '../plugins/dataset-bucket/dataset-bucket-plugin.js';
-
 const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
 
 const DEFAULT_INSTRUCTIONS = `
@@ -54,12 +52,6 @@ export class S3QuoiaMCP {
       const tool = new ToolClass(this.config);
       server.registerTool(tool.name, tool.getConfig(), tool.handler.bind(tool));
     });
-
-    // Inject DatasetBucketPlugin as first plugin so it runs after QueryParserPlugin
-    // has parsed the SQL into per-file settings, filling any missing bucket/endpoint.
-    if (this.config.datasets?.length) {
-      this.config.plugins = [new DatasetBucketPlugin(this.config.datasets), ...(this.config.plugins ?? [])];
-    }
 
     (this.config.tools ?? []).forEach(({ name, description, inputSchema, handler }) => {
       server.registerTool(name, { description, inputSchema }, handler);
